@@ -106,8 +106,15 @@
       { num: 3, title: "Jetpack Compose", desc: "INF2007 – Mobile Application Development • Lecture 3", file: "lecture_3_quiz.html", notes: "notes/lec3.md" },
       { num: 4, title: "State Management & Navigation", desc: "INF2007 – Mobile Application Development • Lecture 4", file: "lecture_4_quiz.html", notes: "notes/lec4.md" },
       { num: 5, title: "Navigation & ViewModel", desc: "INF2007 – Mobile Application Development • Lecture 5", file: "lecture_5_quiz.html", notes: "notes/lec5.md" },
-      { num: 6, title: "Code Blocks Quiz", desc: "INF2007 – Mobile Application Development • Practice Quiz with Code Examples", file: "code_blocks_quiz.html" },
-      { num: 7, title: "True/False Quiz", desc: "INF2007 – Mobile Application Development • Practice True/False Quiz", file: "true_false_quiz.html" }
+      { num: 6, title: "ViewModel", desc: "INF2007 – Mobile Application Development • Lecture 6", file: "lecture_6_quiz.html", notes: "notes/lec6.md" },
+      { num: 7, title: "Architecture", desc: "INF2007 – Mobile Application Development • Lecture 7", file: "lecture_7_quiz.html", notes: "notes/lec7.md" },
+      { num: 8, title: "Hilt & Retrofit", desc: "INF2007 – Mobile Application Development • Lecture 8", file: "lecture_8_quiz.html", notes: "notes/lec8.md" },
+      { num: 9, title: "Threading, Coroutines & Flow", desc: "INF2007 – Mobile Application Development • Lecture 9", file: "lecture_9_quiz.html", notes: "notes/lec9.md" },
+      { num: 10, title: "Background Work, Broadcast Receiver & Content Provider", desc: "INF2007 – Mobile Application Development • Lecture 10", file: "lecture_10_quiz.html", notes: "notes/lec10.md" },
+      { num: 11, title: "Code Blocks Quiz", desc: "INF2007 – Mobile Application Development • Practice Quiz with Code Examples", file: "code_blocks_quiz.html" },
+      { num: 12, title: "Code Blocks Quiz 2", desc: "INF2007 – Mobile Application Development • Practice Quiz with Code Examples 2", file: "code_blocks_quiz_v2.html" },
+      { num: 13, title: "True/False Quiz", desc: "INF2007 – Mobile Application Development • Practice True/False Quiz", file: "true_false_quiz.html" },
+      { num: 14, title: "True/False Quiz 2", desc: "INF2007 – Mobile Application Development • Practice True/False Quiz 2", file: "true_false_quiz_v2.html" },
     ];
 
     // --- Render Quiz Cards ---
@@ -121,7 +128,7 @@
         card.innerHTML = `
           <div>
             <h3>${quiz.title}</h3>
-            <div class="tag">${quiz.num <= 5 ? 'Lecture ' + quiz.num : 'Practice Quiz'}</div>
+            <div class="tag">${quiz.num <= 10 ? 'Lecture ' + quiz.num : 'Practice Quiz'}</div>
           </div>
           <p style="margin:0;color:#9ca3af;font-size:14px">${quiz.desc}</p>
           <div class="btns">

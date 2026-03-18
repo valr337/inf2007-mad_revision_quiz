@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – True/False MCQ Quiz v2</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – True/False MCQ Quiz v2</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Weeks 6–11 review • New question set</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Generated from INF2007 lecture topics (Weeks 6–11). This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "Dependency injection means supplying a dependency from outside a class rather than constructing it directly inside the class.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The DI slides define dependency injection as having the dependency supplied as a parameter, instead of creating it internally."
+  },
+  {
+    "q": "Hilt is described in the lecture as an Android-localized version of Dagger that relies on annotation processing and code generation.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Hilt lecture explicitly describes Hilt that way and notes that it uses annotation processing and code generation."
+  },
+  {
+    "q": "In a Hilt setup, the Application class is annotated with @AndroidEntryPoint.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The Application class uses @HiltAndroidApp. @AndroidEntryPoint is used on Android classes such as activities."
+  },
+  {
+    "q": "A ViewModel intended for Hilt injection is annotated with @HiltViewModel.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture shows Hilt ViewModels declared with @HiltViewModel."
+  },
+  {
+    "q": "By default, every @Inject request in Hilt reuses the same singleton instance even without a scope annotation.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The slides state that by default each @Inject creates a new instance; scopes such as @Singleton change that behavior."
+  },
+  {
+    "q": "Scoping a dependency with @Singleton and installing it in SingletonComponent means Hilt can reuse the same instance for the life of the application.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The component scopes slide says @Singleton in SingletonComponent provides the same instance across the whole application lifetime."
+  },
+  {
+    "q": "@ActivityScoped guarantees one instance shared across all activities in the app.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The lecture states @ActivityScoped reuses the instance only for the corresponding activity lifecycle, not across all activities."
+  },
+  {
+    "q": "@InstallIn tells Hilt which component lifecycle a module’s bindings belong to.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The @InstallIn slide explains that it associates dependencies with the relevant Hilt component and lifecycle."
+  },
+  {
+    "q": "Retrofit is presented in the lecture as a REST client based on OkHttp.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Retrofit slides describe it as a REST client and note that it is based on OkHttp."
+  },
+  {
+    "q": "GsonConverterFactory is used to schedule network retries after a request fails.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "In the Retrofit example, GsonConverterFactory is used for JSON mapping/conversion, not retry scheduling."
+  },
+  {
+    "q": "A suspend function blocks the current thread until its work finishes.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The threading slides explain that suspend functions suspend coroutines without blocking the underlying thread."
+  },
+  {
+    "q": "runBlocking starts a coroutine scope and blocks the current thread while it runs.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture states that runBlocking starts a coroutine scope and blocks the current thread."
+  },
+  {
+    "q": "Dispatchers.Default is used in the slides for CPU-intensive work such as heavy sorting.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The coroutine example uses withContext(Dispatchers.Default) for intensive sorting work."
+  },
+  {
+    "q": "The Android UI thread is the correct place for long-running database queries because it updates the screen faster.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The threading and architecture material warn against long-running work on the UI thread because it blocks responsiveness."
+  },
+  {
+    "q": "The slides warn that holding references to UI objects from background threads can lead to leaked activities.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The threading lecture includes an example where capturing an Activity-related context from a background thread can leak the activity."
+  },
+  {
+    "q": "All four major Android component types run on the main UI thread by default.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Week 11 slides state that all the big four run on the main UI thread."
+  },
+  {
+    "q": "A started service is meant for background work and typically has no direct communication channel back to the activity that started it.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The started services slide shows startService() with no communication between the activity and service."
+  },
+  {
+    "q": "A bound service allows clients to communicate with the service through an IBinder interface.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The bound services slides explain that each client calls onBind() to get an IBinder and use public service methods."
+  },
+  {
+    "q": "Services should always perform long-running work directly on the main thread because they are background components.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The lecture notes explicitly say services still run on the main thread unless you move the long work to a background thread."
+  },
+  {
+    "q": "WorkManager is presented as the recommended solution for persistent background work that can survive app restarts and system reboots.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The WorkManager slide says it remains scheduled through app restarts and system reboots and is the recommended persistent API."
+  },
+  {
+    "q": "In WorkManager, the actual task logic is implemented inside doWork().",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The SimpleWorker example places the work logic in doWork()."
+  },
+  {
+    "q": "BroadcastReceiver is introduced as a form of publish-subscribe pattern.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The broadcast receiver lecture explicitly describes it as implementing a publish-subscribe pattern."
+  },
+  {
+    "q": "A broadcast receiver can only be triggered when the app is already open and visible on screen.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The slides state that a broadcast receiver can be triggered even when the app is not running."
+  },
+  {
+    "q": "sendOrderedBroadcast delivers to receivers one at a time and can use priority to define order.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The custom broadcasts slide explains ordered broadcasts are sent one at a time and ordering can be defined with priority."
+  },
+  {
+    "q": "Content providers are useful only inside a single app and do not support sharing data across app boundaries.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The content provider benefits slide says they allow inter-application data sharing across app boundaries."
+  },
+  {
+    "q": "One listed benefit of content providers is granular permission control over data access.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The content provider benefits slide includes granular permission control."
+  },
+  {
+    "q": "The repository pattern is described as a best practice rather than a formal Android Architecture Components library.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The architecture slides state repository is a best practice and not part of the Architecture Components libraries."
+  },
+  {
+    "q": "The UI layer should directly access databases and network APIs whenever possible to reduce boilerplate.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The architecture lecture says UI components should not interact directly with data sources."
+  },
+  {
+    "q": "A repository can decide whether to fetch data from the network or use cached database results.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The repository slide gives that exact example as repository logic."
+  },
+  {
+    "q": "StateFlow and LiveData both keep a latest value that can be delivered immediately to a recreated activity or fragment.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The slides explain that both replay their latest value when the UI is recreated after configuration changes."
+  },
+  {
+    "q": "A cold Flow starts producing values only when it is collected.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The threading slides describe Flow as cold and explain emission begins when observers subscribe."
+  },
+  {
+    "q": "SharedFlow and StateFlow are hot streams in the lecture material.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The slides explicitly classify SharedFlow and StateFlow as hot."
+  },
+  {
+    "q": "flatMapLatest is recommended when old search results should still update the UI even after a new query starts.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The flatMapLatest slide recommends it to discard old results and keep only the newest active query."
+  },
+  {
+    "q": "collectAsStateWithLifecycle is described as lifecycle-aware Flow collection that stops collecting while the app is in the background by default.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The architecture lecture says collectAsStateWithLifecycle cancels collection when the app is in the background by default."
+  },
+  {
+    "q": "Room DAO methods that return Flow<List<Word>> must always be marked with suspend according to the slide.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The DAO example notes that for Flow-returning queries there is no need for suspend because Room handles that."
+  },
+  {
+    "q": "A ViewModel scoped to a NavBackStackEntry is cleared when that back stack entry is removed from memory.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The ViewModel lecture states that a ViewModel lives as long as its scope remains in memory. When the scoped NavBackStackEntry is removed, that ViewModel is cleared as the flow is logically exited."
+  },
+  {
+    "q": "Calling viewModel() inside a composable necessarily creates a brand new ViewModel on every recomposition.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The lecture explicitly notes that the viewModel() factory caches the instance for the current scope. Recomposition is not the same as recreation, so the existing instance is reused."
+  },
+  {
+    "q": "Composables, activities, and ViewModels are all listed as UI-layer components that should avoid talking directly to raw data sources.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The architecture slides say UI-layer components such as Composables, Activities, and ViewModels should not interact directly with data sources. This separation helps keep the app layered and maintainable."
+  },
+  {
+    "q": "DataStore is one example of a data source mentioned in the architecture lecture.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The data-source slide lists examples such as databases, DataStore, SharedPreferences, Firebase APIs, and other providers. DataStore is explicitly included as one of these sources."
+  },
+  {
+    "q": "In Room, entities define the schema while DAO methods define how the app accesses stored data.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Room slides explain that entities define the database structure and DAO provides methods to access the database. Room works with both pieces together."
+  },
+  {
+    "q": "Room is described as performing compile-time checks on SQLite statements.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "One of the Room caveats highlighted in the lecture is compile-time checking of SQLite statements, which helps catch query issues earlier."
+  },
+  {
+    "q": "Room encourages database work to run on the main thread so UI updates happen faster.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The lecture explicitly warns not to run database operations on the main thread. Long database work there can block the UI and cause responsiveness issues."
+  },
+  {
+    "q": "Dependency injection can still be implemented manually even if Hilt is not used.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Hilt lecture states that DI can be done manually without Hilt. Hilt is a framework that automates and structures injection, but DI itself is not exclusive to Hilt."
+  },
+  {
+    "q": "Assisted injection is useful when a Hilt ViewModel needs a runtime argument such as a navigation parameter.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture's assisted injection example shows a Hilt ViewModel receiving a runtime argument via @Assisted and a factory. This pattern is intended for values only known at runtime."
+  },
+  {
+    "q": "A suspend function by itself starts a new coroutine automatically whenever it is called.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The threading lecture explains that the suspend modifier does not start a coroutine on its own. A suspend function must be called from an existing coroutine or another suspend function."
+  },
+  {
+    "q": "The async builder returns a Deferred value that can be awaited later.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The coroutines section distinguishes async from launch by noting that async promises a result. That result is represented by Deferred and retrieved with await()."
+  },
+  {
+    "q": "The launch builder is mainly used for fire-and-forget coroutine work that does not directly return a value.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture compares launch to starting a new coroutine for work that does not produce a value directly. It returns a Job that represents the coroutine lifecycle rather than a computed result."
+  },
+  {
+    "q": "coroutineScope can be used inside a suspend function to create a child scope that follows structured concurrency.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The threading slides explain that coroutineScope creates a new child scope whose Job is linked to the parent context. This is part of structured concurrency."
+  },
+  {
+    "q": "A Handler is responsible for putting work into a Looper-backed message queue.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The Looper/Handler lecture section describes Looper as the part that keeps pulling tasks from the queue, while Handler is used to manage and enqueue work for that queue."
+  },
+  {
+    "q": "A HandlerThread is simply a normal thread with a Looper prepared for it.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture defines HandlerThread as a thread that has a Looper. That Looper can then be used to create Handlers for queued work on that thread."
+  },
+  {
+    "q": "Posting to Handler(Looper.getMainLooper()) targets the main UI thread.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "Creating a Handler with the main looper means posted tasks go onto the main thread's queue. This is one common way to marshal UI updates safely back to the UI thread."
+  },
+  {
+    "q": "A started service is typically the choice when an activity needs continuous two-way method calls into the service.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The lecture contrasts started and bound services. Continuous two-way communication is the role of a bound service, while a started service is typically used for background work without that direct client channel."
+  },
+  {
+    "q": "A service may be both started and bound at the same time.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The background-work lecture notes explicitly mention that services can be both started and bound. These are not mutually exclusive modes."
+  },
+  {
+    "q": "WorkManager is described as supporting constraints and work chaining for persistent work.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The WorkManager slide lists features including work constraints, robust scheduling, and work chaining. It is presented as the recommended solution for persistent background work."
+  },
+  {
+    "q": "Intent filters determine which broadcast actions a broadcast receiver should respond to.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The broadcast examples pair a receiver with an IntentFilter. That filter specifies which actions should match before the receiver is invoked."
+  },
+  {
+    "q": "Receiver priority is irrelevant for ordered broadcasts because all matching receivers run at exactly the same time.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "Ordered broadcasts are delivered one receiver at a time, and priority can influence the order. They are not presented as all running simultaneously."
+  },
+  {
+    "q": "A content provider can expose data using content:// style URIs and support operations such as query, insert, update, and delete.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture frames content providers as a standard way to expose structured data through URIs, with typical CRUD-style access patterns."
+  },
+  {
+    "q": "A content provider is one of Android's big four component types.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The background-work lecture shows Service, Activity, Content Provider, and Broadcast Receiver together as the major Android component types."
+  },
+  {
+    "q": "Recreating an activity after rotation prevents LiveData and StateFlow from delivering the latest value again from the same retained ViewModel.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "The architecture lecture explains that both LiveData and StateFlow replay the latest available value to observers or collectors in a recreated activity or fragment connected to the same retained ViewModel."
+  },
+  {
+    "q": "flatMapLatest is useful when only the newest user input should keep producing results for the UI.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "The lecture's postal-code example uses flatMapLatest to cancel or discard stale work so only the latest input continues updating the UI."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.textContent = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.textContent = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const percent = currentQuestions.length ? Math.round((state.score / currentQuestions.length) * 100) : 0;
+      percentEl.textContent = `${percent}%`;
+    }
+    function init() {
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', () => {
+      state = { score: 0, answered: 0 };
+      init();
+    });
+    revealBtn.addEventListener('click', () => {
+      document.querySelectorAll('.exp').forEach(exp => exp.hidden = false);
+      document.querySelectorAll('.opt').forEach((row, index) => {
+        const qIdx = +row.getAttribute('data-q');
+        const oIdx = +row.getAttribute('data-o');
+        const data = currentQuestions[qIdx];
+        row.classList.add('disabled');
+        if (oIdx === data.correct) {
+          row.classList.add('correct');
+        }
+      });
+    });
+    shuffleBtn.addEventListener('click', () => {
+      state = { score: 0, answered: 0 };
+      currentQuestions = buildQuestions();
+      render();
+    });
+    init();
+  </script>
+</body>
+</html>

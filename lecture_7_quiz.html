@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Lecture 7 MCQ Quiz: Architecture</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Lecture 7 MCQ Quiz: Architecture</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Lecture 7</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Based on lecture material. This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "What is the main purpose of Android Architecture Components?",
+    "options": [
+      "To structure apps in a way that is robust, testable, and maintainable",
+      "To replace Kotlin with SQL",
+      "To remove the need for a UI layer",
+      "To force every app to use XML layouts"
+    ],
+    "correct": 0,
+    "why": "The slides describe Android Architecture Components as a set of libraries and best practices for building robust, testable, and maintainable apps."
+  },
+  {
+    "q": "Which architectural qualities are emphasized in the lecture?",
+    "options": [
+      "Reactive and layered architecture with separation of concerns",
+      "Monolithic UI logic mixed with data access",
+      "Direct database access from composables",
+      "Only synchronous calls on the main thread"
+    ],
+    "correct": 0,
+    "why": "The architecture slides emphasize a reactive, layered design and separation of concerns."
+  },
+  {
+    "q": "What does single source of truth mean in this app architecture?",
+    "options": [
+      "App data should come from one authoritative source rather than duplicated state everywhere",
+      "Only the UI is allowed to store data",
+      "Every screen must have its own unrelated database",
+      "The repository should never talk to Room"
+    ],
+    "correct": 0,
+    "why": "The diagram and architecture summary describe the repository/data layer as the authoritative source for app data."
+  },
+  {
+    "q": "In the recommended architecture, what should the UI layer primarily do?",
+    "options": [
+      "Display data and forward UI events",
+      "Run raw SQL queries directly",
+      "Own all business rules and persistence code",
+      "Replace the repository"
+    ],
+    "correct": 0,
+    "why": "The app architecture slide states that the UI displays data and forwards UI events."
+  },
+  {
+    "q": "According to the data source slide, which layer should NOT directly interact with data sources?",
+    "options": [
+      "UI layer components such as Composables, Activities, or ViewModels",
+      "DAO interfaces",
+      "RoomDatabase",
+      "Repository implementations"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly states that components in the UI layer should not interact directly with a data source."
+  },
+  {
+    "q": "Which of the following is listed as an example of a data source?",
+    "options": [
+      "Firebase APIs",
+      "Only Text composables",
+      "Navigation routes",
+      "MaterialTheme typography"
+    ],
+    "correct": 0,
+    "why": "Examples listed include databases, DataStore, SharedPreferences, Firebase APIs, GPS providers, Bluetooth providers, and network status providers."
+  },
+  {
+    "q": "What is UI state according to the lecture?",
+    "options": [
+      "What the app says the user should see",
+      "A permanent copy of the SQLite file",
+      "The app manifest",
+      "Only the current route name"
+    ],
+    "correct": 0,
+    "why": "The UI state slide says UI state is what the app says the user should see, while UI is the visual representation of that state."
+  },
+  {
+    "q": "Unless UI state is very simple, what should be the UI's sole responsibility?",
+    "options": [
+      "Consume and display UI state",
+      "Perform database migrations",
+      "Implement repository caching logic",
+      "Generate DAO code"
+    ],
+    "correct": 0,
+    "why": "The lecture says that unless the UI state is very simple, the UI should mainly consume and display UI state."
+  },
+  {
+    "q": "What is a state holder?",
+    "options": [
+      "A class responsible for producing UI state and applying logic to events",
+      "A Room annotation for tables",
+      "A Gradle plugin",
+      "A replacement for coroutines"
+    ],
+    "correct": 0,
+    "why": "State holders are defined as classes responsible for producing UI state and applying logic to events."
+  },
+  {
+    "q": "What pattern of data flow is recommended between UI and ViewModel?",
+    "options": [
+      "Unidirectional data flow",
+      "Two-way database binding from UI to SQLite",
+      "Circular flow between DAO and composables",
+      "Random shared mutable global state"
+    ],
+    "correct": 0,
+    "why": "The slides repeatedly emphasize unidirectional data flow."
+  },
+  {
+    "q": "In unidirectional data flow, what does the UI send to the ViewModel?",
+    "options": [
+      "Events or user actions",
+      "Compiled SQL bytecode",
+      "Only XML resources",
+      "Room schema files"
+    ],
+    "correct": 0,
+    "why": "The UI notifies the ViewModel of user events, and the ViewModel updates state in response."
+  },
+  {
+    "q": "What type of logic is typically implemented with a ViewModel?",
+    "options": [
+      "Business logic or screen-level state holding",
+      "Only bitmap decoding",
+      "Only app signing logic",
+      "Low-level SQLite file parsing"
+    ],
+    "correct": 0,
+    "why": "The ViewModel slides describe it as a business logic or screen-level state holder."
+  },
+  {
+    "q": "Which example from the lecture is business logic?",
+    "options": [
+      "Bookmarking an article when the user taps a button",
+      "Choosing the correct search bar hint",
+      "Scrolling to a list item",
+      "Animating button color"
+    ],
+    "correct": 0,
+    "why": "Bookmarking an article is given as an example of business logic."
+  },
+  {
+    "q": "Which example from the lecture is UI logic?",
+    "options": [
+      "Scrolling to a particular item in a list",
+      "Writing SQL migrations",
+      "Creating foreign keys",
+      "Changing DAO return types"
+    ],
+    "correct": 0,
+    "why": "The logic state holders slide lists scrolling to a particular item and navigation as UI logic examples."
+  },
+  {
+    "q": "How are complex UI logic state holders typically implemented according to the lecture?",
+    "options": [
+      "With a plain Kotlin class",
+      "Only with a Room entity",
+      "Only inside build.gradle",
+      "Inside AndroidManifest.xml"
+    ],
+    "correct": 0,
+    "why": "The lecture says complex UI logic state holders are typically implemented with a plain class."
+  },
+  {
+    "q": "Which statement best describes a ViewModel in Android Jetpack?",
+    "options": [
+      "It manages data for UI components in a lifecycle-conscious way and survives configuration changes",
+      "It is a UI widget for rendering lists",
+      "It replaces the database layer",
+      "It only exists in XML-based apps"
+    ],
+    "correct": 0,
+    "why": "The slides define ViewModel as a lifecycle-conscious state holder that survives configuration changes."
+  },
+  {
+    "q": "Why can a ViewModel be useful across multiple screens?",
+    "options": [
+      "It can be used to share data between screens",
+      "It automatically creates navigation graphs",
+      "It stores the APK",
+      "It eliminates the need for repositories"
+    ],
+    "correct": 0,
+    "why": "The ViewModel slide explicitly says a ViewModel can be used to share data between screens."
+  },
+  {
+    "q": "What does the Compose `viewModel()` function do?",
+    "options": [
+      "Returns an existing ViewModel or creates a new one in the current scope",
+      "Deletes the current ViewModel and creates two replacements",
+      "Builds a Room database",
+      "Converts LiveData to SQLite"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that `viewModel()` returns an existing ViewModel or creates a new one in the given scope."
+  },
+  {
+    "q": "When is a ViewModel retained according to the `viewModel()` slide?",
+    "options": [
+      "As long as its associated scope is alive",
+      "Only for one recomposition",
+      "Only until the next button click",
+      "Forever, even after the app is uninstalled"
+    ],
+    "correct": 0,
+    "why": "The created ViewModel is retained as long as its ViewModelStoreOwner scope remains alive."
+  },
+  {
+    "q": "When is a factory or Hilt needed for a ViewModel?",
+    "options": [
+      "When the ViewModel requires parameters such as a repository",
+      "Only when using Text composables",
+      "Only when using XML navigation",
+      "Never"
+    ],
+    "correct": 0,
+    "why": "The examples show a factory is needed when the ViewModel constructor takes a repository parameter."
+  },
+  {
+    "q": "In the lecture's Compose-oriented architecture, what is recommended for observable state from ViewModel to UI?",
+    "options": [
+      "StateFlow",
+      "Global variables",
+      "SharedPreferences listeners only",
+      "Intent extras only"
+    ],
+    "correct": 0,
+    "why": "The 'From View to Compose' slide says to use StateFlow, unidirectional data flow, and encapsulated UI state."
+  },
+  {
+    "q": "What note is given about updating a data class-based UI state in Compose?",
+    "options": [
+      "You may need to use `.copy()` to trigger an update",
+      "You must always restart the activity",
+      "You should mutate private Room internals directly",
+      "Only XML binding can update it"
+    ],
+    "correct": 0,
+    "why": "The slide explicitly notes that you may need to use `.copy()` to trigger an update."
+  },
+  {
+    "q": "What is Room described as in the lecture?",
+    "options": [
+      "A robust SQL object mapping library",
+      "A UI testing framework",
+      "A replacement for Kotlin coroutines",
+      "A hardware abstraction layer"
+    ],
+    "correct": 0,
+    "why": "The Room slides describe Room as a robust SQL object mapping library."
+  },
+  {
+    "q": "Which set correctly lists the three core Room components?",
+    "options": [
+      "Entity, DAO, Database",
+      "Activity, Fragment, Service",
+      "Intent, BroadcastReceiver, ContentProvider",
+      "Composable, Modifier, Theme"
+    ],
+    "correct": 0,
+    "why": "The lecture identifies Entity, DAO, and Database as the components of Room."
+  },
+  {
+    "q": "What does an Entity instance represent in Room?",
+    "options": [
+      "A row in a database table",
+      "A complete APK",
+      "A navigation destination",
+      "A Gradle module"
+    ],
+    "correct": 0,
+    "why": "The entity slides say one entity instance corresponds to one row in a database table."
+  },
+  {
+    "q": "In a Room entity, what does a member variable typically correspond to?",
+    "options": [
+      "A column name",
+      "A Fragment transaction",
+      "A Drawable resource",
+      "A ViewModel scope"
+    ],
+    "correct": 0,
+    "why": "The lecture states that member variables correspond to column names."
+  },
+  {
+    "q": "Why would you specify `@Entity(tableName = \"word_table\")`?",
+    "options": [
+      "To set a table name different from the class name",
+      "To enable network caching",
+      "To make the DAO optional",
+      "To convert Flow into LiveData"
+    ],
+    "correct": 0,
+    "why": "The annotations slide says `@Entity(tableName = ...)` is used when the table name differs from the class name."
+  },
+  {
+    "q": "What does `@PrimaryKey(autoGenerate = true)` do?",
+    "options": [
+      "It lets Room auto-generate unique keys for entity instances",
+      "It automatically adds foreign keys",
+      "It makes every field nullable",
+      "It disables insert operations"
+    ],
+    "correct": 0,
+    "why": "The annotate entities slide says setting `autoGenerate` to true lets Room assign automatic IDs."
+  },
+  {
+    "q": "What is the purpose of `@ColumnInfo(name = \"first_name\")`?",
+    "options": [
+      "To specify a column name different from the property name",
+      "To create a new DAO",
+      "To make the field transient",
+      "To define a primary key"
+    ],
+    "correct": 0,
+    "why": "`@ColumnInfo(name = ...)` allows the database column name to differ from the Kotlin member variable name."
+  },
+  {
+    "q": "What form must a DAO take in Room?",
+    "options": [
+      "An interface or abstract class",
+      "A sealed class only",
+      "An enum class",
+      "A composable function"
+    ],
+    "correct": 0,
+    "why": "The DAO slide says a DAO must be an interface or abstract class."
+  },
+  {
+    "q": "What is the main role of a DAO?",
+    "options": [
+      "To define read/write operations for the database and provide a clean API",
+      "To replace the repository layer",
+      "To draw the UI",
+      "To manage the Android lifecycle"
+    ],
+    "correct": 0,
+    "why": "The lecture says DAO methods provide abstract access to the app database and Room uses DAO to create a clean API."
+  },
+  {
+    "q": "Which statement about Room query return types is correct?",
+    "options": [
+      "Queries can return `List`, `Flow<List<...>>`, or `LiveData<List<...>>`",
+      "Queries must always return only `String`",
+      "Queries can never return Flow",
+      "Queries always require `suspend` regardless of return type"
+    ],
+    "correct": 0,
+    "why": "The example queries slide explicitly shows `List`, `Flow<List<Word>>`, and `LiveData<List<Word>>` as valid patterns."
+  },
+  {
+    "q": "According to the lecture, when a DAO query returns Flow or LiveData, what is noted about `suspend`?",
+    "options": [
+      "No `suspend` is needed because Room handles that",
+      "`suspend` is forbidden in all DAO methods",
+      "The app will crash without `suspend`",
+      "It only works with XML layouts"
+    ],
+    "correct": 0,
+    "why": "The slide notes: 'No need suspend, Room handles that' for observable query return types."
+  },
+  {
+    "q": "How are Room relationships defined according to the lecture?",
+    "options": [
+      "Using foreign keys, `@Embedded`, `@Relation`, and junction tables",
+      "By storing direct object references inside every entity",
+      "Only with inheritance",
+      "Only with `MutableStateFlow`"
+    ],
+    "correct": 0,
+    "why": "The relationships slide lists foreign keys, `@Embedded`, `@Relation`, and junction tables."
+  },
+  {
+    "q": "Why do Room entities not directly contain object references according to the relationship slides?",
+    "options": [
+      "To keep relationships explicit, predictable, and cleanly separated",
+      "Because SQLite does not support columns",
+      "Because Room only supports strings",
+      "To prevent using DAOs"
+    ],
+    "correct": 0,
+    "why": "The lecture highlights clean separation of tables, predictable query behavior, and avoiding tight coupling."
+  },
+  {
+    "q": "What is the role of `@Transaction` in the relationship example?",
+    "options": [
+      "It is used on the DAO method when querying related data",
+      "It marks a composable as stateful",
+      "It creates the primary key",
+      "It replaces `@Query`"
+    ],
+    "correct": 0,
+    "why": "The one-to-one relationship example shows `@Transaction` used on the DAO method returning related data."
+  },
+  {
+    "q": "How do you create a Room database class?",
+    "options": [
+      "Create an abstract class extending `RoomDatabase` and annotate it with `@Database`",
+      "Create a normal class extending `ViewModel`",
+      "Create a composable called `RoomDatabase()`",
+      "Declare only a DAO and skip the database class"
+    ],
+    "correct": 0,
+    "why": "The lecture says to create a public abstract class extending `RoomDatabase` and annotate it with `@Database`."
+  },
+  {
+    "q": "Why is a Room database usually made a singleton?",
+    "options": [
+      "To avoid creating multiple database instances unnecessarily",
+      "Because Room only works with global variables",
+      "To force all code onto the main thread",
+      "Because DAOs cannot be reused"
+    ],
+    "correct": 0,
+    "why": "The slides repeatedly note that the RoomDatabase is usually created as a singleton instance."
+  },
+  {
+    "q": "What does the Room database builder require in the example?",
+    "options": [
+      "Application context, database class, and database name",
+      "Only a ViewModel instance",
+      "Only a DAO and a route name",
+      "Only a Composable and a Modifier"
+    ],
+    "correct": 0,
+    "why": "The builder example shows `context.applicationContext`, `WordRoomDatabase::class.java`, and `\"word_database\"`."
+  },
+  {
+    "q": "What is the purpose of the `onOpen` callback shown in the Room example?",
+    "options": [
+      "To run initialization or population logic when the database is opened",
+      "To recompile the app",
+      "To create a new Activity",
+      "To change the primary key type"
+    ],
+    "correct": 0,
+    "why": "The example callback populates the database inside `onOpen`."
+  },
+  {
+    "q": "Which Room caveat is emphasized in the lecture?",
+    "options": [
+      "Do not run database operations on the main thread",
+      "Database operations should always block the UI",
+      "Room cannot check SQL statements at compile time",
+      "Room must never use Flow"
+    ],
+    "correct": 0,
+    "why": "The Room caveats slide explicitly says not to run database operations on the main thread."
+  },
+  {
+    "q": "What is the repository in this architecture?",
+    "options": [
+      "A best-practice layer that provides a single, clean API to app data",
+      "A required Android component library class",
+      "A replacement for Room entities",
+      "A UI-only helper"
+    ],
+    "correct": 0,
+    "why": "The lecture says repository is best practice, not an Architecture Components library, and provides a single clean API to app data."
+  },
+  {
+    "q": "What additional responsibility can a repository handle besides delegating to DAO?",
+    "options": [
+      "Deciding whether to fetch from network or use cached database results",
+      "Rendering composables directly",
+      "Replacing StateFlow with XML",
+      "Owning the Android lifecycle"
+    ],
+    "correct": 0,
+    "why": "The repository slide gives network-vs-cache selection as an example responsibility."
+  },
+  {
+    "q": "Which storage option is recommended for small datasets stored as key-value pairs or typed objects?",
+    "options": [
+      "DataStore",
+      "Room only",
+      "External storage only",
+      "BroadcastReceiver"
+    ],
+    "correct": 0,
+    "why": "The on-device data storage choices slide says DataStore is for small datasets as key-value pairs or typed objects."
+  },
+  {
+    "q": "Which storage option is recommended for small to large amounts of structured data in a private database?",
+    "options": [
+      "SQLite Databases / Room",
+      "Preferences DataStore only",
+      "External public storage only",
+      "Intent extras"
+    ],
+    "correct": 0,
+    "why": "The lecture says SQLite Databases / Room are for structured data in a private local database."
+  },
+  {
+    "q": "What is Preferences DataStore mainly used for?",
+    "options": [
+      "Persisting simple data types such as strings, integers, and booleans",
+      "Representing many-to-many SQL relationships",
+      "Rendering the UI tree",
+      "Replacing the DAO layer"
+    ],
+    "correct": 0,
+    "why": "The DataStore slide says Preferences DataStore is used for persisting simple data types."
+  },
+  {
+    "q": "What is the key advantage of Proto DataStore over Preferences DataStore?",
+    "options": [
+      "It stores strongly typed objects with a defined schema",
+      "It automatically creates SQL tables",
+      "It only works on the main thread",
+      "It removes the need for coroutines"
+    ],
+    "correct": 0,
+    "why": "Proto DataStore uses protocol buffers and allows you to define a schema for strongly typed data."
+  },
+  {
+    "q": "Why does the lecture recommend avoiding SharedPreferences going forward?",
+    "options": [
+      "Because DataStore handles async, errors, and transactions more safely",
+      "Because SharedPreferences can store large relational schemas better",
+      "Because SharedPreferences is required only for Jetpack Compose previews",
+      "Because SharedPreferences can expose Flow directly with strong typing"
+    ],
+    "correct": 0,
+    "why": "The lecture lists problems with SharedPreferences such as manual background threading, poor error signaling, runtime exceptions, and lack of strong transactional consistency."
+  },
+  {
+    "q": "Which statement about Preferences DataStore is correct?",
+    "options": [
+      "It exposes a Flow representing the current state of the data",
+      "It uses `apply()` and `commit()` like SharedPreferences",
+      "It returns mutable references to its internal state",
+      "It requires a Room entity for every key"
+    ],
+    "correct": 0,
+    "why": "The Preferences DataStore overview slide says it exposes a Flow and does not have `apply()` or `commit()`."
+  },
+  {
+    "q": "How do you update Preferences DataStore values according to the lecture?",
+    "options": [
+      "Use the `edit()` function to transactionally update values",
+      "Use `commit()` on the UI thread",
+      "Mutate the Flow directly",
+      "Change the Gradle dependency at runtime"
+    ],
+    "correct": 0,
+    "why": "The slide shows `dataStore.edit { ... }` for transactional updates."
+  },
+  {
+    "q": "When should you choose Room instead of DataStore?",
+    "options": [
+      "When you need partial updates, referential integrity, or large/complex datasets",
+      "When you only need one Boolean setting",
+      "When you want to avoid structured data entirely",
+      "When you need no schema and no relationships"
+    ],
+    "correct": 0,
+    "why": "The DataStore vs Room slide recommends Room for partial updates, referential integrity, and large or complex datasets."
+  },
+  {
+    "q": "What is LiveData?",
+    "options": [
+      "A lifecycle-aware observable data holder",
+      "A Room migration strategy",
+      "A navigation graph",
+      "A dependency injection container"
+    ],
+    "correct": 0,
+    "why": "The LiveData slide defines it as a data holder class aware of lifecycle events that can be observed."
+  },
+  {
+    "q": "What happens when the observed LiveData changes?",
+    "options": [
+      "Observer objects are notified and can update the UI",
+      "The database file is deleted",
+      "The ViewModel scope ends immediately",
+      "The app stops collecting StateFlow forever"
+    ],
+    "correct": 0,
+    "why": "The lecture says LiveData notifies observer objects when observed data changes."
+  },
+  {
+    "q": "What is one important difference between StateFlow and LiveData?",
+    "options": [
+      "StateFlow requires an initial value, while LiveData does not",
+      "LiveData requires an initial value, while StateFlow does not",
+      "StateFlow cannot be observed in Compose",
+      "LiveData always needs Room"
+    ],
+    "correct": 0,
+    "why": "The comparison slide explicitly states that StateFlow requires an initial state but LiveData does not."
+  },
+  {
+    "q": "What is another important difference between StateFlow and LiveData lifecycle behavior?",
+    "options": [
+      "LiveData observation stops automatically with lifecycle state changes, but Flow collection needs lifecycle-aware collection such as `repeatOnLifecycle`",
+      "StateFlow stops automatically while LiveData never does",
+      "Neither supports lifecycle awareness",
+      "Both automatically stop and resume without any lifecycle handling"
+    ],
+    "correct": 0,
+    "why": "The slide says LiveData automatically unregisters when the view is STOPPED, whereas StateFlow needs lifecycle-aware collection such as `repeatOnLifecycle`."
+  },
+  {
+    "q": "If you pass observable data from Room to the UI through your architecture layers, what should remain consistent across the layers?",
+    "options": [
+      "Use LiveData/Flow/StateFlow across DAO, Repository, and ViewModel, then observe in UI",
+      "Convert everything to global mutable variables",
+      "Use SQL strings directly in composables",
+      "Only the DAO needs an observable type"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly states that when you pass observable data through layers, it should stay as LiveData/Flow/StateFlow in DAO, Repository, and ViewModel, then be observed in the UI."
+  },
+  {
+    "q": "What is the benefit of `collectAsStateWithLifecycle()` mentioned in the lecture?",
+    "options": [
+      "It collects Flow values in a lifecycle-aware way and cancels collection when the app is in the background by default",
+      "It converts a DAO into a database builder",
+      "It replaces `@Query` annotations",
+      "It auto-generates primary keys"
+    ],
+    "correct": 0,
+    "why": "The lifecycle-aware slide says `collectAsStateWithLifecycle()` collects Flow values in a lifecycle-aware way and cancels background collection by default."
+  },
+  {
+    "q": "What happens to LiveData or StateFlow after a configuration change such as rotation, assuming the same ViewModel is retained?",
+    "options": [
+      "The recreated activity or fragment receives the latest available value immediately",
+      "All data is lost and reset to null",
+      "Only Room entities survive, not observable state",
+      "The UI must wait for manual database reloading every time"
+    ],
+    "correct": 0,
+    "why": "The configuration change slide says both LiveData and StateFlow replay the latest value to a recreated UI when using the same retained ViewModel."
+  },
+  {
+    "q": "Why is `flatMapLatest` or `switchMap` useful for query-like inputs that change quickly?",
+    "options": [
+      "They discard older work and ensure only the latest result is returned to the UI",
+      "They force all previous results to overwrite the newest one",
+      "They make Room run on the main thread",
+      "They replace repositories entirely"
+    ],
+    "correct": 0,
+    "why": "The switching slide explains that these operators cancel or discard old searches so stale results do not incorrectly update the UI."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Entity(tableName = \"word_table\")\n2  data class Word(\n3      @PrimaryKey(autoGenerate = true)\n4      val id: Int = 0,\n5      @ColumnInfo(name = \"word_text\")\n6      val text: String\n7  )</pre>Which statement is correct?",
+    "options": [
+      "The primary key is auto-generated and the database column for `text` is named `word_text`",
+      "The table name will be `Word` and the primary key cannot be generated",
+      "`text` is ignored by Room because it uses `@ColumnInfo`",
+      "The entity defines two separate tables"
+    ],
+    "correct": 0,
+    "why": "`@PrimaryKey(autoGenerate = true)` allows auto-generated IDs, and `@ColumnInfo(name = \"word_text\")` changes the column name for the `text` property."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Dao\n2  interface WordDao {\n3      @Query(\"SELECT * FROM word_table ORDER BY word ASC\")\n4      fun getAllWords(): Flow&lt;List&lt;Word&gt;&gt;\n5  }</pre>What does this DAO method return?",
+    "options": [
+      "A Flow that emits ordered lists of Word items from the table",
+      "A single Word value only once",
+      "A mutable reference to the SQLite file",
+      "A ViewModel instance"
+    ],
+    "correct": 0,
+    "why": "The query returns `Flow<List<Word>>`, meaning an observable stream of ordered Word lists from the table."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class MainViewModel(private val repository: WordRepository) : ViewModel() {\n2      val allWords = repository.allWords.stateIn(\n3          scope = viewModelScope,\n4          started = SharingStarted.WhileSubscribed(),\n5          initialValue = emptyList()\n6      )\n7  }</pre>Why is `initialValue = emptyList()` supplied here?",
+    "options": [
+      "Because StateFlow requires an initial value",
+      "Because LiveData always requires an empty database",
+      "Because Room rejects null queries",
+      "Because repositories must return mutable lists"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that StateFlow requires an initial state."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  private val addressInput = MutableStateFlow(\"\")\n2  val postalCodeFlow = addressInput\n3      .flatMapLatest { address -&gt;\n4          repository.getPostCodeFlow(address)\n5      }</pre>What problem does `flatMapLatest` solve here?",
+    "options": [
+      "It prevents older address lookups from updating the UI after a newer input arrives",
+      "It converts the flow into SharedPreferences",
+      "It guarantees SQL inserts run on the main thread",
+      "It removes the need for a repository"
+    ],
+    "correct": 0,
+    "why": "The switching slide explains that `flatMapLatest` discards stale earlier queries and keeps only the latest result path."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>

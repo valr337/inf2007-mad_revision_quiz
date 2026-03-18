@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Lecture 6 MCQ Quiz: Threading, Coroutines & Flow</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Lecture 9 MCQ Quiz: Threading, Coroutines & Flow</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Lecture 9</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Based on lecture material. This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "What is a thread in relation to a process?",
+    "options": [
+      "The entity within a process that can be scheduled for execution",
+      "A separate process with its own virtual address space",
+      "A database transaction for background work",
+      "A UI widget used for asynchronous updates"
+    ],
+    "correct": 0,
+    "why": "The lecture defines a thread as the schedulable execution entity inside a process."
+  },
+  {
+    "q": "Which statement correctly compares processes and threads?",
+    "options": [
+      "Threads of the same process share memory, while processes use separate memory spaces",
+      "Processes share heap memory, while threads do not",
+      "Threads always run in separate memory spaces",
+      "Processes and threads are identical except for naming"
+    ],
+    "correct": 0,
+    "why": "The slides state that threads of the same process share memory, whereas processes run in separate memory spaces."
+  },
+  {
+    "q": "When a process starts, what does it have at minimum?",
+    "options": [
+      "At least one thread of execution",
+      "Exactly four worker threads",
+      "A HandlerThread and a Looper",
+      "A ThreadPoolExecutor"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that each process starts with a single primary thread and may create more later."
+  },
+  {
+    "q": "Which resource is shared by threads of the same process?",
+    "options": [
+      "The process virtual address space and heap",
+      "Each thread’s stack",
+      "Each thread’s registers only",
+      "A separate executable per thread"
+    ],
+    "correct": 0,
+    "why": "Threads share the process address space and system resources such as the heap, but each still has its own stack and registers."
+  },
+  {
+    "q": "Which of the following is shown as a valid way to start work on another thread in Kotlin?",
+    "options": [
+      "Thread { /* logic */ }.start()",
+      "NavController { /* logic */ }.start()",
+      "LiveData { /* logic */ }.start()",
+      "remember { /* logic */ }.start()"
+    ],
+    "correct": 0,
+    "why": "The lecture shows several thread creation approaches, including Thread { ... }.start()."
+  },
+  {
+    "q": "What is the role of the Android main/UI thread?",
+    "options": [
+      "It services the app work queue and handles UI-related work",
+      "It is used only for network requests",
+      "It exists only during app startup",
+      "It automatically distributes work across CPU cores"
+    ],
+    "correct": 0,
+    "why": "The slides explain that app tasks are pushed into a work queue and serviced on the UI thread."
+  },
+  {
+    "q": "Why can a dropped frame happen on the UI thread?",
+    "options": [
+      "A task takes too long and misses the drawing deadline",
+      "The app has too few classes",
+      "The device has no internet connection",
+      "A coroutine always blocks the UI thread"
+    ],
+    "correct": 0,
+    "why": "The dropped-frame diagram shows a long 22 ms task causing a missed draw window."
+  },
+  {
+    "q": "What threading risks are explicitly highlighted in the lecture?",
+    "options": [
+      "Memory contention and read/write misordering",
+      "Only slow internet",
+      "Only syntax errors",
+      "Only null pointer exceptions"
+    ],
+    "correct": 0,
+    "why": "The Android UI thread slides explicitly warn about memory contention and read/write misordering."
+  },
+  {
+    "q": "How should UI objects be managed in Android?",
+    "options": [
+      "Created, updated, and destroyed only on the UI thread",
+      "Updated freely from any background thread",
+      "Always managed inside ThreadPoolExecutor",
+      "Managed only through SharedFlow"
+    ],
+    "correct": 0,
+    "why": "The lecture states that UI objects are meant to be managed only on the UI thread."
+  },
+  {
+    "q": "Why can capturing an Activity context inside a long-running background thread be dangerous?",
+    "options": [
+      "It can leak the Activity if configuration changes recreate it before the thread finishes",
+      "It prevents recomposition completely",
+      "It converts the thread into a coroutine",
+      "It makes dispatchers unavailable"
+    ],
+    "correct": 0,
+    "why": "The leaked-activity example shows a background thread holding a context reference that can keep the old Activity alive."
+  },
+  {
+    "q": "According to the lecture conclusion, what should handle UI directly?",
+    "options": [
+      "Only the main activity/fragment responsible for the UI",
+      "Any worker thread",
+      "Only a HandlerThread",
+      "Only a ThreadPoolExecutor"
+    ],
+    "correct": 0,
+    "why": "The lecture concludes that only the main activity/fragment should be responsible for the UI."
+  },
+  {
+    "q": "If a background thread needs to update the UI, which mechanisms are mentioned?",
+    "options": [
+      "Intents or runOnUiThread()",
+      "Only SharedFlow",
+      "Only StateFlow",
+      "Only newFixedThreadPoolContext()"
+    ],
+    "correct": 0,
+    "why": "The slides explicitly list Intents and runOnUiThread() for thread-to-UI updates."
+  },
+  {
+    "q": "What best describes a Looper?",
+    "options": [
+      "A loop that repeatedly gets tasks from a queue and executes them",
+      "A database used by coroutines",
+      "A replacement for the UI thread",
+      "A class that stores only completed results"
+    ],
+    "correct": 0,
+    "why": "The lecture describes Looper conceptually as while(keepRunning) getTaskFromQueue then doTask."
+  },
+  {
+    "q": "What does a Handler do in the Looper/Handler model?",
+    "options": [
+      "Manages the task queue, such as posting work to the head or tail",
+      "Owns the Activity lifecycle",
+      "Replaces Dispatchers.IO",
+      "Creates only UI widgets"
+    ],
+    "correct": 0,
+    "why": "The lecture defines Handler as the component that manages the task queue."
+  },
+  {
+    "q": "What is a HandlerThread?",
+    "options": [
+      "A Thread that already has a Looper",
+      "A Flow operator for background work",
+      "A special type of LiveData",
+      "A Job without a dispatcher"
+    ],
+    "correct": 0,
+    "why": "The slides define HandlerThread as a Thread that has a Looper, which can then be used to create Handlers."
+  },
+  {
+    "q": "When is HandlerThread a good fit?",
+    "options": [
+      "For several long-running operations that should be done sequentially off the UI thread",
+      "For rendering every frame on the UI thread",
+      "For replacing all Activities",
+      "For storing persistent app state"
+    ],
+    "correct": 0,
+    "why": "The lecture gives HandlerThread as a use case for sequential long-running operations that are not critical for immediate UI updates."
+  },
+  {
+    "q": "What is one safe way shown to update the UI from background work using Handler?",
+    "options": [
+      "Create a Handler with Looper.getMainLooper() and call handler.post { ... }",
+      "Update TextView directly from any worker thread",
+      "Call emit() on a Flow from a random thread",
+      "Only use DisposableEffect"
+    ],
+    "correct": 0,
+    "why": "The lecture shows handler.post { ... } on a main-looper Handler as one safe UI update pattern."
+  },
+  {
+    "q": "Why must prepareHandler() be called after starting a HandlerThread in the built-in example?",
+    "options": [
+      "Because the looper is null until the thread goes live",
+      "Because HandlerThread works only after onDestroy()",
+      "Because Dispatchers.Default must be initialized first",
+      "Because SharedFlow needs a replay cache"
+    ],
+    "correct": 0,
+    "why": "The built-in WorkerThread example notes that the looper is null until Thread.start() has been called."
+  },
+  {
+    "q": "What is the primary use case for ThreadPoolExecutor in the lecture?",
+    "options": [
+      "Several intensive operations that should be done in parallel",
+      "Ensuring all work runs on the main thread",
+      "Managing Compose recomposition",
+      "Replacing coroutine cancellation"
+    ],
+    "correct": 0,
+    "why": "ThreadPoolExecutor is presented for parallel intensive operations with work distribution and scheduling concerns."
+  },
+  {
+    "q": "What is one issue with creating too many threads?",
+    "options": [
+      "More threads than cores and extra memory usage",
+      "The process no longer has a main thread",
+      "All flows become hot automatically",
+      "Dispatchers.Main stops existing"
+    ],
+    "correct": 0,
+    "why": "The lecture warns that too many threads can exceed core count and that each thread consumes memory."
+  },
+  {
+    "q": "How does the lecture describe coroutines?",
+    "options": [
+      "A modern cooperative concurrency pattern with lightweight threads",
+      "A mandatory replacement for every Java thread",
+      "A UI-only API for animations",
+      "A database storage abstraction"
+    ],
+    "correct": 0,
+    "why": "The coroutines slide describes coroutines as cooperative routines and lightweight threads."
+  },
+  {
+    "q": "What is a key benefit of coroutines on Android?",
+    "options": [
+      "They help move long-running work off the main thread without blocking it",
+      "They force all code onto Dispatchers.Main",
+      "They make race conditions impossible",
+      "They remove the need for coroutine scopes"
+    ],
+    "correct": 0,
+    "why": "The lecture highlights main-safety and offloading long-running work to avoid ANR."
+  },
+  {
+    "q": "Which coroutine builder is described as fire-and-forget and returns a Job?",
+    "options": [
+      "launch",
+      "async",
+      "withContext",
+      "collect"
+    ],
+    "correct": 0,
+    "why": "The slides say launch is for starting coroutines that do not return a value and returns a Job."
+  },
+  {
+    "q": "Which coroutine builder returns a Deferred result?",
+    "options": [
+      "async",
+      "launch",
+      "runBlocking",
+      "flowOn"
+    ],
+    "correct": 0,
+    "why": "The lecture states that async returns Deferred, a Job with a result."
+  },
+  {
+    "q": "What does runBlocking do?",
+    "options": [
+      "Starts a coroutine scope and blocks the current thread",
+      "Launches a background thread without waiting",
+      "Creates a SharedFlow",
+      "Makes suspend functions run on the UI thread only"
+    ],
+    "correct": 0,
+    "why": "The lecture describes runBlocking as bridging blocking code and suspending functions by blocking the current thread."
+  },
+  {
+    "q": "Why might only <code>\"in main\"</code> print in the first coroutine example without an added sleep?",
+    "options": [
+      "Because the main thread is not blocked and can finish before the launched coroutine prints",
+      "Because launch always runs before main",
+      "Because delay blocks the thread permanently",
+      "Because GlobalScope cancels the main function first"
+    ],
+    "correct": 0,
+    "why": "The example shows that launch does not block main, so the main function can finish before the coroutine output appears."
+  },
+  {
+    "q": "What is true about <code>delay()</code>?",
+    "options": [
+      "It is a suspend function that suspends the coroutine without blocking the thread",
+      "It always blocks the underlying thread",
+      "It can be called only from Java threads",
+      "It creates a new CoroutineScope automatically"
+    ],
+    "correct": 0,
+    "why": "The suspend-functions slides emphasize that delay is non-blocking and suspends the coroutine rather than the thread."
+  },
+  {
+    "q": "Why are suspend functions easier to read than deeply nested callbacks?",
+    "options": [
+      "They let asynchronous logic be written in a more sequential style",
+      "They remove the need for dispatchers entirely",
+      "They always run on Dispatchers.IO",
+      "They cannot call any other suspend function"
+    ],
+    "correct": 0,
+    "why": "The lecture contrasts callback hell with cleaner sequential-looking suspend-function code."
+  },
+  {
+    "q": "Which statement about suspend functions is correct?",
+    "options": [
+      "A suspend function can only be called from a coroutine or another suspend function",
+      "A suspend function always starts a new coroutine by itself",
+      "A suspend function always provides its own CoroutineScope",
+      "A suspend function cannot switch dispatchers"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly states suspend functions can be called only from within a coroutine or another suspend function."
+  },
+  {
+    "q": "What does <code>coroutineScope { }</code> provide inside a suspend function?",
+    "options": [
+      "A new CoroutineScope with structured parent-child behavior",
+      "A replacement for Dispatchers.Main",
+      "A guaranteed background thread",
+      "A SharedFlow replay cache"
+    ],
+    "correct": 0,
+    "why": "The lecture says coroutineScope creates a new scope with a new Job that inherits the outer coroutine context."
+  },
+  {
+    "q": "By default, two suspend function calls made one after another run:",
+    "options": [
+      "Sequentially",
+      "In parallel automatically",
+      "Only on the main thread",
+      "Only if wrapped in a Handler"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly notes that the example is sequential by default and then shows async for parallelism."
+  },
+  {
+    "q": "Which dispatcher is intended for disk or network I/O?",
+    "options": [
+      "Dispatchers.IO",
+      "Dispatchers.Main",
+      "Dispatchers.Default",
+      "Dispatchers.Unconfined"
+    ],
+    "correct": 0,
+    "why": "The dispatchers slide states Dispatchers.IO is optimized for disk and network I/O."
+  },
+  {
+    "q": "Which dispatcher is intended for CPU-intensive work such as sorting or parsing JSON?",
+    "options": [
+      "Dispatchers.Default",
+      "Dispatchers.Main",
+      "Dispatchers.IO",
+      "LifecycleScope"
+    ],
+    "correct": 0,
+    "why": "The lecture gives sorting and parsing JSON as examples for Dispatchers.Default."
+  },
+  {
+    "q": "What does <code>withContext()</code> do?",
+    "options": [
+      "Switches the coroutine context of the current coroutine without creating a new coroutine",
+      "Creates a new process",
+      "Creates a new SharedFlow",
+      "Cancels the parent scope"
+    ],
+    "correct": 0,
+    "why": "The withContext slide says it switches coroutine context and combines the new context with the previous one."
+  },
+  {
+    "q": "What is structured concurrency concerned with?",
+    "options": [
+      "Tracking the hierarchy and lifetimes of coroutines",
+      "Rendering Compose UI faster",
+      "Replacing all thread primitives",
+      "Making every flow hot"
+    ],
+    "correct": 0,
+    "why": "The structured concurrency slides describe it as managing coroutine hierarchy and lifetime."
+  },
+  {
+    "q": "How can the normal parent-child Job relation be overridden according to the lecture?",
+    "options": [
+      "By launching in a different scope such as GlobalScope or by passing a different Job",
+      "Only by using MutableStateFlow",
+      "Only by calling withContext",
+      "It cannot be overridden"
+    ],
+    "correct": 0,
+    "why": "The parent-child relation slide lists these two override cases explicitly."
+  },
+  {
+    "q": "What is true about parent coroutines?",
+    "options": [
+      "A parent waits for all of its children to complete",
+      "A parent finishes immediately when its own code ends, regardless of children",
+      "A parent can never be cancelled",
+      "A parent always ignores child exceptions"
+    ],
+    "correct": 0,
+    "why": "The lecture states that a parent coroutine always waits for completion of all its children."
+  },
+  {
+    "q": "Which item is part of a CoroutineContext?",
+    "options": [
+      "Job",
+      "Room entity",
+      "NavHost",
+      "Composable lambda only"
+    ],
+    "correct": 0,
+    "why": "The lecture lists Job, CoroutineDispatcher, CoroutineName, and CoroutineExceptionHandler as CoroutineContext elements."
+  },
+  {
+    "q": "What happens to work launched in <code>viewModelScope</code> when the ViewModel is cleared?",
+    "options": [
+      "It is cancelled automatically",
+      "It becomes global work",
+      "It is moved to lifecycleScope automatically",
+      "It keeps running forever"
+    ],
+    "correct": 0,
+    "why": "The lifecycle-aware components slides state that coroutines in viewModelScope are cancelled when the ViewModel is cleared."
+  },
+  {
+    "q": "What happens to work launched in <code>lifecycleScope</code> when the Lifecycle is destroyed?",
+    "options": [
+      "It is cancelled automatically",
+      "It is promoted to viewModelScope",
+      "It blocks the UI thread first",
+      "It is converted into LiveData"
+    ],
+    "correct": 0,
+    "why": "The lecture says lifecycleScope coroutines are cancelled when the Lifecycle is destroyed."
+  },
+  {
+    "q": "How is coroutine cancellation described?",
+    "options": [
+      "Cooperative, not forced",
+      "Immediate and unavoidable in all loops",
+      "Possible only on Dispatchers.IO",
+      "Available only for SharedFlow"
+    ],
+    "correct": 0,
+    "why": "The cancellation slide explicitly says coroutine cancellation is cooperative, not forced."
+  },
+  {
+    "q": "Where do coroutines stop naturally for cancellation according to the lecture?",
+    "options": [
+      "At cancellation points such as suspend functions",
+      "At every variable assignment",
+      "Only at app startup",
+      "Only when collectLatest is used"
+    ],
+    "correct": 0,
+    "why": "The lecture states that cancellation stops only at cancellation points, especially suspend functions."
+  },
+  {
+    "q": "Which of the following is suggested for manual cancellation checks in running loops?",
+    "options": [
+      "Use isActive, ensureActive(), or yield()",
+      "Use rememberSaveable only",
+      "Use NavController.popBackStack()",
+      "Use SideEffect only"
+    ],
+    "correct": 0,
+    "why": "The cancellation slide explicitly lists isActive, ensureActive(), and yield() as cancellation checks."
+  },
+  {
+    "q": "What does <code>SupervisorJob()</code> change in cancellation behavior?",
+    "options": [
+      "Cancellation propagates only downwards",
+      "It forces all child failures to cancel the parent immediately",
+      "It disables structured concurrency",
+      "It makes all jobs global"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that SupervisorJob propagates cancellation only downward."
+  },
+  {
+    "q": "Why is <code>counter++</code> inside many concurrent coroutines unsafe?",
+    "options": [
+      "Because race conditions can make the final result incorrect",
+      "Because coroutines cannot change integers",
+      "Because withContext prevents incrementing",
+      "Because Dispatchers.Default is single-threaded"
+    ],
+    "correct": 0,
+    "why": "The race conditions section shows that simple shared increments do not produce the expected result."
+  },
+  {
+    "q": "Which options are suggested to fix race conditions in the lecture?",
+    "options": [
+      "Atomic, Mutex, or Actor",
+      "LaunchedEffect, SideEffect, or remember",
+      "NavHost, NavController, or Intent",
+      "LiveData, RecyclerView, or Bundle"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly recommends Atomic, Mutex, or Actor for race-condition handling."
+  },
+  {
+    "q": "What is Flow in Kotlin coroutines?",
+    "options": [
+      "A stream of data that can be computed asynchronously and emit multiple sequential values",
+      "A special Activity subclass",
+      "A replacement for all dispatchers",
+      "A UI-only animation system"
+    ],
+    "correct": 0,
+    "why": "The Flow slide defines Flow as a stream of data computed asynchronously that can emit multiple sequential values."
+  },
+  {
+    "q": "How does the lecture describe regular Flow compared with SharedFlow and StateFlow?",
+    "options": [
+      "Flow is cold, while SharedFlow and StateFlow are hot",
+      "Flow is hot, while SharedFlow is cold",
+      "All three are cold",
+      "All three are hot in the same way"
+    ],
+    "correct": 0,
+    "why": "The SharedFlow section explicitly contrasts cold Flow with hot SharedFlow and StateFlow."
+  },
+  {
+    "q": "What does “cold” mean for Flow?",
+    "options": [
+      "It starts emitting only when collected by a subscriber",
+      "It always replays the latest value automatically",
+      "It emits regardless of observers",
+      "It can be used only on Dispatchers.IO"
+    ],
+    "correct": 0,
+    "why": "The lecture says a cold flow starts emitting only when an observer subscribes."
+  },
+  {
+    "q": "What is the default replay value shown for MutableSharedFlow?",
+    "options": [
+      "0",
+      "1",
+      "Unlimited",
+      "It has no replay setting"
+    ],
+    "correct": 0,
+    "why": "The SharedFlow constructor slide shows replay: Int = 0 by default."
+  },
+  {
+    "q": "Which statement best describes StateFlow?",
+    "options": [
+      "It is a special variant of SharedFlow that always has a value and replays the latest value",
+      "It has no current value",
+      "It can only have one observer",
+      "It is colder than Flow"
+    ],
+    "correct": 0,
+    "why": "The StateFlow slide says it always has a value, its value is unique, and it reproduces only the latest value to subscribers."
+  },
+  {
+    "q": "By default, where does the producer code inside a <code>flow { }</code> builder execute?",
+    "options": [
+      "In the CoroutineContext of the coroutine that collects from it",
+      "Always on Dispatchers.Default",
+      "Always on Dispatchers.IO",
+      "Always on the main thread regardless of collector"
+    ],
+    "correct": 0,
+    "why": "The lecture says a flow builder producer executes in the CoroutineContext of the collector by default."
+  },
+  {
+    "q": "Which operator is shown for moving upstream flow work to another dispatcher?",
+    "options": [
+      "flowOn(Dispatchers.Default)",
+      "collect(Dispatchers.Default)",
+      "remember(Dispatchers.Default)",
+      "yield(Dispatchers.Default)"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly shows flowOn(Dispatchers.Default) for upstream flow context changes."
+  },
+  {
+    "q": "What is the main purpose of <code>LaunchedEffect</code> in Compose?",
+    "options": [
+      "To call suspend functions safely from inside a composable",
+      "To create a ThreadPoolExecutor",
+      "To replace all event handlers",
+      "To make every flow hot"
+    ],
+    "correct": 0,
+    "why": "The lecture says LaunchedEffect should be used to call suspend functions safely from inside a composable."
+  },
+  {
+    "q": "What happens if <code>LaunchedEffect</code> is recomposed with different keys?",
+    "options": [
+      "The existing coroutine is cancelled and a new one is launched",
+      "Nothing; the old coroutine must always continue",
+      "The composable leaves composition permanently",
+      "It turns into rememberCoroutineScope"
+    ],
+    "correct": 0,
+    "why": "The slides state that changing keys cancels the old LaunchedEffect coroutine and starts a new one."
+  },
+  {
+    "q": "What does <code>rememberCoroutineScope()</code> return?",
+    "options": [
+      "A CoroutineScope tied to that point in the composition",
+      "A StateFlow with replay = 1",
+      "A new HandlerThread",
+      "A lifecycleOwner"
+    ],
+    "correct": 0,
+    "why": "The lecture describes rememberCoroutineScope as returning a CoroutineScope bound to the composition call site."
+  },
+  {
+    "q": "What is a SideEffect in Compose according to the lecture?",
+    "options": [
+      "A predictable effect API used to publish Compose state to non-Compose code after successful recomposition",
+      "Any exception thrown during recomposition",
+      "A way to launch background threads permanently",
+      "A replacement for DisposableEffect cleanup"
+    ],
+    "correct": 0,
+    "why": "The SideEffect slide says it publishes Compose state to non-Compose code and runs after every successful recomposition."
+  },
+  {
+    "q": "When should <code>DisposableEffect</code> be used?",
+    "options": [
+      "For effects that require cleanup when keys change or when the composable leaves composition",
+      "Only for running CPU-intensive work",
+      "Only for collecting StateFlow",
+      "Only for creating dispatchers"
+    ],
+    "correct": 0,
+    "why": "The lecture explains that DisposableEffect is for effects that require cleanup and must include onDispose."
+  },
+  {
+    "q": "<pre class=\"code-block\">runBlocking {\n    val one = async {\n        delay(1000)\n        13\n    }\n    val two = async {\n        delay(1000)\n        29\n    }\n    println(one.await() + two.await())\n}</pre>\nCompared with calling the two suspend functions one after another, what is the main result?",
+    "options": [
+      "The two computations can overlap, so total time is about 1000+ ms instead of 2000+ ms",
+      "The code becomes sequential and slower",
+      "The code must run only on Dispatchers.Main",
+      "The result changes from 42 to 13"
+    ],
+    "correct": 0,
+    "why": "The lecture’s timing example shows sequential execution taking about 2000+ ms and async/await reducing it to about 1000+ ms."
+  },
+  {
+    "q": "<pre class=\"code-block\">LaunchedEffect(Unit) {\n    delay(1000)\n    uiText = \"Hello from LaunchedEffect!\"\n}</pre>\nWhat is the intended behavior of this example?",
+    "options": [
+      "It launches once when the composable enters composition and updates the UI text after the delay",
+      "It creates a permanent global coroutine",
+      "It runs on every recomposition even with the same key",
+      "It replaces remember completely"
+    ],
+    "correct": 0,
+    "why": "The lecture example uses LaunchedEffect(Unit) to trigger an effect once on entering composition."
+  },
+  {
+    "q": "<pre class=\"code-block\">val handler = Handler(Looper.getMainLooper())\nthread {\n    Thread.sleep(1000)\n    handler.post {\n        binding.infoText.setText(\"Hello World!\")\n    }\n}</pre>\nWhy is this pattern used?",
+    "options": [
+      "Background work happens off the UI thread, then the UI update is safely posted back to the main thread",
+      "It forces Thread.sleep() onto Dispatchers.IO",
+      "It avoids using any thread at all",
+      "It makes the handler run only once per app install"
+    ],
+    "correct": 0,
+    "why": "The lecture presents this as a safe pattern: do background work first, then post UI updates to the main looper."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>

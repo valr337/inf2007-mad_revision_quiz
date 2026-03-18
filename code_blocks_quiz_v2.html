@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Code Blocks MCQ Quiz v2</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Code Blocks MCQ Quiz v2</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Weeks 6–11 review • New question set</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Generated from INF2007 lecture topics (Weeks 6–11). This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "<pre class=\"code-block\">1  class Engine @Inject constructor() {\n2      val id = \"E1\"\n3  }\n4  class Car @Inject constructor(private val engine: Engine) {\n5      fun label() = \"Using ${engine.id}\"\n6  }\n7  fun main() {\n8      val car = Car(Engine())\n9      println(car.label())\n10 }</pre>\nWhat is printed by this program?",
+    "options": [
+      "Using E1",
+      "E1",
+      "Using Engine",
+      "Compilation error"
+    ],
+    "correct": 0,
+    "why": "[Lines 1-2] define Engine with id = \"E1\". [Lines 4-5] build the string \"Using ${engine.id}\". [Lines 8-9] create Car with Engine() and print the label, so the output is \"Using E1\"."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Module\n2  @InstallIn(SingletonComponent::class)\n3  object AppModule {\n4      @Singleton\n5      @Provides\n6      fun provideCache(): MutableList&lt;Int&gt; = mutableListOf()\n7  }</pre>\nWhat does the <code>@Singleton</code> scope indicate here?",
+    "options": [
+      "Hilt provides the same cache instance for the whole application",
+      "A new cache is created on every injection",
+      "The cache exists only for one composable recomposition",
+      "The cache is recreated for every function call"
+    ],
+    "correct": 0,
+    "why": "[Lines 1-6] define a Hilt module installed in SingletonComponent. With [line 4] using @Singleton, Hilt reuses the same provided instance for the application lifetime instead of creating a new one each time."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @HiltViewModel\n2  class WordViewModel @Inject constructor(\n3      private val repository: WordRepository\n4  ) : ViewModel()\n5  @Composable\n6  fun WordScreen(viewModel: WordViewModel = hiltViewModel()) {\n7      Text(\"Ready\")\n8  }</pre>\nWhich call obtains the ViewModel instance inside the composable?",
+    "options": [
+      "viewModel()",
+      "hiltViewModel()",
+      "remember()",
+      "collectAsState()"
+    ],
+    "correct": 1,
+    "why": "[Line 6] explicitly uses hiltViewModel() as the default parameter value. In the lecture material, Hilt ViewModels in Compose are retrieved with @HiltViewModel together with hiltViewModel()."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  interface GitHubService {\n2      @GET(\"search/repositories?sort=stars&q=Android\")\n3      suspend fun searchRepos(\n4          @Query(\"page\") page: Int,\n5          @Query(\"per_page\") perPage: Int\n6      ): RepoResponse\n7  }</pre>\nIf <code>searchRepos(2, 20)</code> is called, which query parameters are added by Retrofit?",
+    "options": [
+      "page=2 and per_page=20",
+      "page=20 and per_page=2",
+      "sort=2 and q=20",
+      "No query parameters are added"
+    ],
+    "correct": 0,
+    "why": "[Lines 4-5] annotate the parameters with @Query(\"page\") and @Query(\"per_page\"). Calling searchRepos(2, 20) adds page=2 and per_page=20 to the request."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val service = Retrofit.Builder()\n2      .baseUrl(\"https://api.github.com/\")\n3      .addConverterFactory(GsonConverterFactory.create())\n4      .build()\n5      .create(GitHubService::class.java)</pre>\nWhat is the role of <code>GsonConverterFactory.create()</code> in this setup?",
+    "options": [
+      "It converts JSON responses into Kotlin objects",
+      "It starts the network request immediately",
+      "It encrypts all HTTP requests",
+      "It replaces the base URL at runtime"
+    ],
+    "correct": 0,
+    "why": "[Line 3] adds GsonConverterFactory to Retrofit. In the lecture example, Retrofit uses this converter so JSON payloads can be mapped to Kotlin data classes like Repo and RepoResponse."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  fun main() = runBlocking {\n2      launch {\n3          delay(200)\n4          println(\"B\")\n5      }\n6      println(\"A\")\n7  }</pre>\nWhich output order is expected?",
+    "options": [
+      "A then B",
+      "B then A",
+      "Only B",
+      "Nothing is printed"
+    ],
+    "correct": 0,
+    "why": "[Lines 2-5] launch a coroutine that waits 200 ms before printing B. [Line 6] prints A immediately inside runBlocking, so A appears before B."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  suspend fun heavy(): Int = withContext(Dispatchers.Default) {\n2      6 * 7\n3  }\n4  fun main() = runBlocking {\n5      val answer = heavy()\n6      println(answer)\n7  }</pre>\nWhat is printed?",
+    "options": [
+      "42",
+      "67",
+      "0",
+      "Compilation error"
+    ],
+    "correct": 0,
+    "why": "[Lines 1-2] compute 6 * 7 inside withContext(Dispatchers.Default). [Lines 5-6] store and print the returned value, so 42 is printed."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  fun main() = runBlocking {\n2      val job = launch {\n3          delay(100)\n4          println(\"worker\")\n5      }\n6      println(\"start\")\n7      job.join()\n8      println(\"done\")\n9  }</pre>\nWhat is the output order?",
+    "options": [
+      "start, worker, done",
+      "worker, start, done",
+      "start, done, worker",
+      "done, start, worker"
+    ],
+    "correct": 0,
+    "why": "[Line 6] prints start first. [Line 7] waits for the launched coroutine to finish. The coroutine prints worker at [line 4], and only after join completes does [line 8] print done."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val worker = WorkerThread()\n2  worker.start()\n3  worker.prepareHandler()\n4  worker.postTask(Runnable { println(\"hello\") })</pre>\nOn which thread is the posted task intended to run?",
+    "options": [
+      "On the HandlerThread background thread",
+      "Always on the UI thread",
+      "On a new process",
+      "Inside a BroadcastReceiver"
+    ],
+    "correct": 0,
+    "why": "The lecture HandlerThread example posts tasks to the Handler associated with that thread’s Looper. After [lines 2-3] start the thread and prepare the handler, the Runnable is queued for execution on the WorkerThread."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {\n2      Thread {\n3          doLongTask()\n4          stopSelf()\n5      }.start()\n6      return START_NOT_STICKY\n7  }</pre>\nWhy is the long task placed inside a separate <code>Thread</code> here?",
+    "options": [
+      "To avoid blocking the main UI thread",
+      "Because services automatically run on a separate process",
+      "Because onStartCommand cannot call any functions directly",
+      "To convert the service into a bound service"
+    ],
+    "correct": 0,
+    "why": "The Week 11 slides state that all big 4 components, including services, run on the main UI thread by default. A long-running task is moved into a background thread so the main thread is not blocked."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class LocalService : Service() {\n2      inner class LocalBinder : Binder() {\n3          fun getService(): LocalService = this@LocalService\n4      }\n5      fun getSecret4DNum(): Int = 1234\n6  }</pre>\nWhat does <code>getService()</code> return?",
+    "options": [
+      "The current LocalService instance",
+      "A new Activity instance",
+      "An IntentFilter",
+      "A WorkRequest"
+    ],
+    "correct": 0,
+    "why": "[Lines 2-3] define a Binder method that returns this@LocalService, which is the current LocalService object. This is how the client can call the service’s public methods."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class SimpleWorker(context: Context, params: WorkerParameters) : Worker(context, params) {\n2      override fun doWork(): Result {\n3          Log.d(\"SimpleWorker\", \"run\")\n4          return Result.success()\n5      }\n6  }\n7  val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java)\n8      .setInitialDelay(5, TimeUnit.MINUTES)\n9      .build()\n10 WorkManager.getInstance(context).enqueue(request)</pre>\nWhich method contains the actual background work logic?",
+    "options": [
+      "enqueue()",
+      "build()",
+      "doWork()",
+      "setInitialDelay()"
+    ],
+    "correct": 2,
+    "why": "[Lines 1-5] define the Worker. The lecture notes state that you implement the background work logic in doWork(), while the WorkRequest and enqueue() are used to schedule and submit it."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val filter = IntentFilter(\"com.mypackage.CUSTOM_INTENT\")\n2  val receiver = object : BroadcastReceiver() {\n3      override fun onReceive(context: Context, intent: Intent?) {\n4          println(\"received\")\n5      }\n6  }\n7  registerReceiver(receiver, filter)</pre>\nWhat will trigger <code>onReceive()</code>?",
+    "options": [
+      "A broadcast sent with the action com.mypackage.CUSTOM_INTENT",
+      "Any screen rotation",
+      "A Room database insert",
+      "A call to startService()"
+    ],
+    "correct": 0,
+    "why": "[Line 1] creates an IntentFilter for com.mypackage.CUSTOM_INTENT. [Line 7] registers the receiver with that filter, so onReceive() runs when a matching broadcast is sent."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val intent = Intent(\"com.mypackage.CUSTOM_INTENT\")\n2  sendOrderedBroadcast(intent, null)</pre>\nHow are receivers invoked for this broadcast?",
+    "options": [
+      "One at a time in order",
+      "All at exactly the same time with no order",
+      "Only receivers inside the same Activity",
+      "Only if the app is in the foreground"
+    ],
+    "correct": 0,
+    "why": "The broadcast lecture notes state that sendOrderedBroadcast sends to receivers one at a time, and the order can be influenced by priority."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val uri = Uri.parse(\"content://com.example.words/words\")\n2  val cursor = contentResolver.query(uri, null, null, null, null)</pre>\nWhich Android mechanism is being used here to access shared data?",
+    "options": [
+      "ContentProvider via ContentResolver",
+      "Service via Binder",
+      "BroadcastReceiver via IntentFilter",
+      "WorkManager via WorkRequest"
+    ],
+    "correct": 0,
+    "why": "[Line 2] uses contentResolver.query(...). ContentResolver is the client-side API used to query data exposed by a ContentProvider."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Dao\n2  interface WordDao {\n3      @Query(\"SELECT * from word_table ORDER BY word ASC\")\n4      fun getAllWords(): Flow&lt;List&lt;Word&gt;&gt;\n5  }\n6  class WordRepository(private val wordDao: WordDao) {\n7      val allWords: Flow&lt;List&lt;Word&gt;&gt; = wordDao.getAllWords()\n8  }</pre>\nWhich layer is acting as the clean API between the DAO and the rest of the app?",
+    "options": [
+      "Repository",
+      "Composable UI",
+      "BroadcastReceiver",
+      "Manifest"
+    ],
+    "correct": 0,
+    "why": "[Lines 6-7] show the repository exposing data from the DAO. The architecture lecture describes the repository as the single, clean API to app data."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class CounterViewModel : ViewModel() {\n2      private val _count = MutableStateFlow(0)\n3      val count: StateFlow&lt;Int&gt; = _count\n4      fun inc() { _count.value++ }\n5  }\n6  fun main() {\n7      val vm = CounterViewModel()\n8      vm.inc()\n9      vm.inc()\n10     println(vm.count.value)\n11 }</pre>\nWhat is printed?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "Compilation error"
+    ],
+    "correct": 2,
+    "why": "[Line 2] starts _count at 0. [Lines 8-9] call inc() twice, incrementing the value to 2. [Line 10] prints the current StateFlow value, which is 2."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  private val addressInput = MutableStateFlow(\"\")\n2  val postalCodeFlow = addressInput.flatMapLatest { address ->\n3      repository.getPostCodeFlow(address)\n4  }</pre>\nWhat is the effect of using <code>flatMapLatest</code> here?",
+    "options": [
+      "Older address lookups are discarded when a new address arrives",
+      "All previous address lookups continue forever",
+      "The flow becomes synchronous and blocks the UI thread",
+      "The repository is recreated on each keystroke"
+    ],
+    "correct": 0,
+    "why": "The architecture slides explain that flatMapLatest ensures only the latest query result is returned. When a new address arrives, earlier unfinished flows are cancelled/discarded."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @HiltViewModel(assistedFactory = NextViewModel.Factory::class)\n2  class NextViewModel @AssistedInject constructor(\n3      @Assisted val runtimeArg: String\n4  ) : ViewModel() {\n5      val lastNumber: StateFlow&lt;String&gt; = MutableStateFlow(runtimeArg)\n6  }</pre>\nIf the runtime argument passed is <code>\"88\"</code>, what is the initial value of <code>lastNumber</code>?",
+    "options": [
+      "\"88\"",
+      "\"0\"",
+      "\"runtimeArg\"",
+      "null"
+    ],
+    "correct": 0,
+    "why": "[Lines 2-5] show that runtimeArg is injected at creation time and directly used to initialize MutableStateFlow(runtimeArg). If runtimeArg is \"88\", lastNumber starts as \"88\"."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Composable\n2  fun PostScreen(viewModel: PostViewModel = viewModel()) {\n3      val posts by viewModel.posts.collectAsStateWithLifecycle()\n4      Text(\"Posts: ${posts.size}\")\n5  }</pre>\nWhat is the main benefit of <code>collectAsStateWithLifecycle()</code> in this code?",
+    "options": [
+      "It collects Flow values in a lifecycle-aware way",
+      "It converts Flow into LiveData permanently",
+      "It makes the ViewModel injectable by Hilt",
+      "It forces collection even when the app is in the background"
+    ],
+    "correct": 0,
+    "why": "[Line 3] uses collectAsStateWithLifecycle(). The architecture lecture notes describe it as lifecycle-aware Flow collection, cancelling collection when the UI is not active and resuming with the latest value later."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Composable\n2  fun Demo() {\n3      val vm: CounterViewModel = viewModel()\n4      Text(\"Count: ${vm.count}\")\n5  }</pre>\nWhat happens if <code>Demo()</code> recomposes multiple times while staying in the same scope?",
+    "options": [
+      "A brand new ViewModel is created on every recomposition",
+      "The existing cached ViewModel instance is reused",
+      "Compilation error because viewModel() cannot be called in a composable",
+      "The count resets because recomposition destroys the ViewModel"
+    ],
+    "correct": 1,
+    "why": "The lecture notes state that the <code>viewModel()</code> factory is smart and caches the instance for the current scope. Recomposition is not the same as recreation, so repeated recompositions reuse the same ViewModel instead of creating a new one."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val parentEntry = navController.getBackStackEntry(\"checkout\")\n2  val vm: CheckoutViewModel = viewModel(parentEntry)\n3  navController.popBackStack(\"checkout\", inclusive = true)</pre>\nWhat happens to the ViewModel scope after line 3 executes?",
+    "options": [
+      "The ViewModel is kept forever because it was already created",
+      "The ViewModel is cleared because its back stack entry was removed",
+      "The ViewModel becomes a singleton for the whole app",
+      "Nothing changes because popBackStack only affects the UI"
+    ],
+    "correct": 1,
+    "why": "The lecture explains that a ViewModel lives as long as its scope, such as a NavBackStackEntry, stays in memory. Once that back stack entry is popped inclusively, the scoped ViewModel is logically exited and cleared."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class UserRepository(private val dao: UserDao, private val api: UserApi) {\n2      suspend fun load(id: Int): User {\n3          return dao.getUser(id) ?: api.fetchUser(id).also { dao.insert(it) }\n4      }\n5  }</pre>\nIf the user is not in the local database, what does <code>load()</code> do?",
+    "options": [
+      "It throws an error immediately without trying the network",
+      "It fetches from the API, inserts the result, and returns that user",
+      "It always returns null",
+      "It clears the database before making the network call"
+    ],
+    "correct": 1,
+    "why": "The Elvis operator on line 3 means the API path is used only when <code>dao.getUser(id)</code> returns null. The fetched user is inserted with <code>also { dao.insert(it) }</code> and that same user is returned."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val DARK_MODE = booleanPreferencesKey(\"dark_mode\")\n2  suspend fun save(store: DataStore&lt;Preferences&gt;) {\n3      store.edit { prefs -&gt; prefs[DARK_MODE] = true }\n4  }</pre>\nWhat does this function do?",
+    "options": [
+      "It deletes the entire DataStore file",
+      "It writes the <code>dark_mode</code> preference as <code>true</code>",
+      "It reads the current preference without changing it",
+      "It creates a Room table named dark_mode"
+    ],
+    "correct": 1,
+    "why": "The code creates a boolean preference key on line 1 and then updates that key inside <code>store.edit</code> on line 3. This stores the value <code>true</code> for <code>dark_mode</code>."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @AndroidEntryPoint\n2  class MainActivity : ComponentActivity() {\n3      @Inject lateinit var repo: WordRepository\n4  }</pre>\nWhy can <code>repo</code> be provided here?",
+    "options": [
+      "Because <code>@AndroidEntryPoint</code> marks this Android class as an injection entry point for Hilt",
+      "Because every Activity automatically gets all dependencies without annotations",
+      "Because <code>@Inject</code> makes the field static",
+      "Because ViewModel always injects repository fields into activities"
+    ],
+    "correct": 0,
+    "why": "Hilt injects Android classes that are marked as entry points. Here, <code>@AndroidEntryPoint</code> on the activity allows Hilt to provide the <code>@Inject</code> field when the activity is created."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  interface UserService {\n2      @GET(\"users/{id}\")\n3      suspend fun getUser(@Path(\"id\") id: Int): User\n4  }</pre>\nIf <code>getUser(5)</code> is called, what happens to the request path?",
+    "options": [
+      "The literal text <code>{id}</code> stays unchanged",
+      "The <code>{id}</code> placeholder is replaced with <code>5</code>",
+      "The value 5 is sent only in the HTTP body",
+      "Retrofit converts the call into a POST request automatically"
+    ],
+    "correct": 1,
+    "why": "Retrofit uses <code>@Path</code> to substitute values into the URL path template. Calling <code>getUser(5)</code> replaces <code>{id}</code> with <code>5</code>."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  fun main() = runBlocking {\n2      val deferred = async { 21 * 2 }\n3      println(deferred.await())\n4  }</pre>\nWhat is printed?",
+    "options": [
+      "21",
+      "42",
+      "0",
+      "Compilation error"
+    ],
+    "correct": 1,
+    "why": "The <code>async</code> block computes <code>21 * 2</code> and returns a <code>Deferred</code>. <code>await()</code> retrieves that result, so the printed value is 42."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  suspend fun loadBoth() = coroutineScope {\n2      launch {\n3          delay(100)\n4          println(\"child\")\n5      }\n6      println(\"parent\")\n7  }\n8  fun main() = runBlocking {\n9      loadBoth()\n10     println(\"done\")\n11 }</pre>\nWhat is the print order?",
+    "options": [
+      "parent, child, done",
+      "child, parent, done",
+      "parent, done, child",
+      "done, parent, child"
+    ],
+    "correct": 0,
+    "why": "Line 6 prints <code>parent</code> immediately. The launched child prints <code>child</code> after the delay. Because <code>coroutineScope</code> waits for its child coroutines to finish, line 10 prints <code>done</code> only after <code>child</code>."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val handler = Handler(Looper.getMainLooper())\n2  thread {\n3      handler.post { println(\"UI update\") }\n4  }</pre>\nOn which thread does the posted block run?",
+    "options": [
+      "On the same background thread that called <code>thread { }</code>",
+      "On the main UI thread",
+      "On a random thread from a thread pool",
+      "It will never run because handlers cannot cross threads"
+    ],
+    "correct": 1,
+    "why": "The handler is created with <code>Looper.getMainLooper()</code>, which targets the main UI thread's message queue. Posting a runnable to it schedules that block on the main thread."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  private val connection = object : ServiceConnection {\n2      override fun onServiceConnected(className: ComponentName, service: IBinder) {\n3          val binder = service as LocalService.LocalBinder\n4          mService = binder.getService()\n5          mBound = true\n6      }\n7  }</pre>\nWhat is the purpose of lines 3 to 5?",
+    "options": [
+      "They stop the service immediately after binding",
+      "They obtain the service instance from the binder and mark the client as bound",
+      "They convert the service into a broadcast receiver",
+      "They move the service onto a different process"
+    ],
+    "correct": 1,
+    "why": "When the connection is established, the client receives an <code>IBinder</code>. The code casts it to the service's binder, retrieves the actual service instance, and records that the activity is now bound to that service."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val constraints = Constraints.Builder()\n2      .setRequiresCharging(true)\n3      .build()\n4  val request = OneTimeWorkRequest.Builder(SyncWorker::class.java)\n5      .setConstraints(constraints)\n6      .build()</pre>\nWhen is this work eligible to run?",
+    "options": [
+      "Only when the device is charging",
+      "Only when airplane mode is enabled",
+      "Immediately, regardless of any device state",
+      "Only after the app is force-closed"
+    ],
+    "correct": 0,
+    "why": "The WorkRequest includes a constraint created with <code>setRequiresCharging(true)</code>. That means WorkManager should wait until the device is charging before running the task."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val filter = IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED)\n2  registerReceiver(receiver, filter)\n3  sendBroadcast(Intent(\"com.example.CUSTOM\"))</pre>\nWhat happens to the registered receiver?",
+    "options": [
+      "It receives the custom broadcast because all broadcasts match all filters",
+      "It does not receive this broadcast because the action does not match the filter",
+      "It crashes because custom actions are not allowed",
+      "It is automatically unregistered after line 3"
+    ],
+    "correct": 1,
+    "why": "The receiver was registered for the airplane-mode action only. Since line 3 sends a different custom action, this receiver does not match that intent filter and should not receive it."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val values = ContentValues().apply { put(\"word\", \"hello\") }\n2  contentResolver.insert(\n3      Uri.parse(\"content://com.example.words/words\"),\n4      values\n5  )</pre>\nWhat operation is being requested?",
+    "options": [
+      "Insert data through a content provider URI",
+      "Start a bound service",
+      "Register a broadcast receiver",
+      "Create a Retrofit endpoint"
+    ],
+    "correct": 0,
+    "why": "The code builds <code>ContentValues</code> and calls <code>contentResolver.insert(...)</code> with a <code>content://</code> URI. This is the standard content-provider style insert request."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Dao\n2  interface WordDao {\n3      @Query(\"SELECT * FROM word_table ORDER BY word ASC\")\n4      fun getAllWords(): Flow&lt;List&lt;Word&gt;&gt;\n5  }</pre>\nWhat is an advantage of returning <code>Flow&lt;List&lt;Word&gt;&gt;</code> here?",
+    "options": [
+      "The DAO method can only be called once",
+      "Collectors can receive updated lists when the table changes",
+      "It forces the query to run on the main thread",
+      "It prevents Room from generating SQL code"
+    ],
+    "correct": 1,
+    "why": "The lecture notes describe Room and Flow/LiveData as observation-based. Returning a <code>Flow</code> lets collectors observe new results when the underlying table changes."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val worker = WorkerThread()\n2  worker.prepareHandler()\n3  worker.start()</pre>\nBased on the lecture's built-in <code>HandlerThread</code> example, what is the issue here?",
+    "options": [
+      "Nothing is wrong; prepareHandler must always be called before start",
+      "The handler may try to use the looper before the thread has started",
+      "The thread becomes a bound service",
+      "Calling start after prepareHandler turns it into a coroutine"
+    ],
+    "correct": 1,
+    "why": "The lecture notes say the handler should be created only after the thread goes live. If <code>prepareHandler()</code> is called before <code>start()</code>, the thread's looper may not be ready yet."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  private val addressInput = MutableStateFlow(\"\")\n2  val postalCodeFlow = addressInput\n3      .flatMapLatest { address -&gt; repository.getPostCodeFlow(address) }</pre>\nWhat is the main benefit of using <code>flatMapLatest</code> here?",
+    "options": [
+      "Older lookups keep updating the UI even after new input arrives",
+      "Only the latest input continues producing results for the UI",
+      "It converts the flow into LiveData automatically",
+      "It makes the repository run on the main thread"
+    ],
+    "correct": 1,
+    "why": "The architecture lecture explains that <code>flatMapLatest</code> is useful when newer input should replace older ongoing work. Once a new address arrives, old lookups are discarded so only the latest results continue toward the UI."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Lecture 6 MCQ Quiz: ViewModel & Revision</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Lecture 6 MCQ Quiz: ViewModel &amp; Revision</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Lecture 6</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Based on lecture material. This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "Why is standard <code>remember</code> not enough for screen logic that must survive device rotation?",
+    "options": [
+      "Because activities are recreated on configuration changes, so remember state is lost",
+      "Because remember can only store Booleans",
+      "Because remember automatically clears the back stack",
+      "Because remember is only available in XML"
+    ],
+    "correct": 0,
+    "why": "Android recreates activities on configuration changes such as rotation. <code>remember</code> only survives recomposition, not activity recreation."
+  },
+  {
+    "q": "What limitation of <code>rememberSaveable</code> motivates using a ViewModel?",
+    "options": [
+      "It handles primitives well but falls short for complex logic or navigation state",
+      "It cannot save strings",
+      "It works only inside a ViewModel",
+      "It always survives process death for every object"
+    ],
+    "correct": 0,
+    "why": "The lecture positions <code>rememberSaveable</code> for simple persisted UI state, while complex business logic and navigation state belong in a ViewModel."
+  },
+  {
+    "q": "What best describes a ViewModel in this lecture?",
+    "options": [
+      "A lifecycle-aware state container that holds UI state and logic between UI configurations and navigation",
+      "A Composable that directly draws the UI",
+      "A replacement for NavHost",
+      "A database layer for storing all app data"
+    ],
+    "correct": 0,
+    "why": "The slides define ViewModel as a lifecycle-aware state container that separates logic from layout and survives UI recreation."
+  },
+  {
+    "q": "What happens to a ViewModel when an activity is recreated due to rotation?",
+    "options": [
+      "The existing ViewModel instance is retained and reused",
+      "A brand new ViewModel is always created",
+      "The ViewModel is serialized into the route string",
+      "The ViewModel is destroyed as soon as the activity pauses"
+    ],
+    "correct": 0,
+    "why": "ViewModels survive configuration changes by default. Rotation recreates the activity, but the existing ViewModel instance is reused."
+  },
+  {
+    "q": "When is a ViewModel cleared?",
+    "options": [
+      "When its owning scope is permanently destroyed",
+      "Every time the composable recomposes",
+      "Whenever the user presses Home",
+      "Whenever a TextField value changes"
+    ],
+    "correct": 0,
+    "why": "A ViewModel is cleared only when its scope is logically and permanently destroyed, such as exiting the activity or popping the owning NavBackStackEntry."
+  },
+  {
+    "q": "What is the key idea behind the <code>viewModel()</code> factory?",
+    "options": [
+      "It caches and returns an existing instance in the current scope when possible",
+      "It creates a fresh instance on every recomposition",
+      "It replaces rememberSaveable for all state",
+      "It automatically navigates to the next screen"
+    ],
+    "correct": 0,
+    "why": "Recomposition is not recreation. <code>viewModel()</code> looks up the current scope and returns the cached instance if one already exists."
+  },
+  {
+    "q": "How does a pure Kotlin ViewModel trigger UI updates in Compose?",
+    "options": [
+      "By exposing Compose-observable state such as <code>mutableStateOf</code>",
+      "By calling <code>setText()</code> directly on composables",
+      "By storing values in SharedPreferences only",
+      "By forcing the Activity to restart"
+    ],
+    "correct": 0,
+    "why": "<code>mutableStateOf</code> bridges ViewModel state into Compose's reactive system so state reads can trigger recomposition."
+  },
+  {
+    "q": "Why is the decoupled stateless UI approach preferred over putting UI and ViewModel logic together in one composable?",
+    "options": [
+      "It improves separation of concerns, reuse, and testability",
+      "It makes recomposition impossible",
+      "It removes the need for events",
+      "It forces every screen to use a global variable"
+    ],
+    "correct": 0,
+    "why": "A container composable can obtain the ViewModel while a pure UI composable receives plain data and callbacks, which improves reuse and testability."
+  },
+  {
+    "q": "How should navigation be modeled according to the lecture?",
+    "options": [
+      "As a side-effect of state change, not just a click listener",
+      "As direct mutation inside the ViewModel using NavController",
+      "As a global singleton shared by all composables",
+      "As a replacement for state hoisting"
+    ],
+    "correct": 0,
+    "why": "The lecture says navigation should follow state changes. The ViewModel stays framework-agnostic and the UI performs navigation as a side-effect."
+  },
+  {
+    "q": "Why should you avoid passing <code>NavController</code> into a ViewModel?",
+    "options": [
+      "Because the ViewModel should stay UI-framework-agnostic and avoid tight coupling",
+      "Because NavController cannot be used with Compose",
+      "Because ViewModels cannot call functions",
+      "Because it automatically causes memory leaks in every app"
+    ],
+    "correct": 0,
+    "why": "The slides say the ViewModel must not depend on Android UI objects or navigation controllers, keeping it testable and decoupled."
+  },
+  {
+    "q": "What does the scope rule mean for a ViewModel?",
+    "options": [
+      "A ViewModel lives as long as its owning scope, such as a NavBackStackEntry, remains in memory",
+      "A ViewModel lives for the entire app process no matter what",
+      "A ViewModel is recreated every time you navigate forward",
+      "A ViewModel only survives while the screen is currently visible"
+    ],
+    "correct": 0,
+    "why": "A ViewModel survives backgrounding but dies when the user logically exits the flow and its owning scope is removed."
+  },
+  {
+    "q": "How should state be shared across Screen A and Screen B if both screens need the same source of truth?",
+    "options": [
+      "Hoist the ViewModel scope to a parent that outlives both screens",
+      "Call <code>viewModel()</code> separately inside each screen and rely on luck",
+      "Store the state in a local variable in Screen A",
+      "Duplicate the same state in both screens"
+    ],
+    "correct": 0,
+    "why": "If both screens need the same source of truth, the shared state should live in a parent scope such as an Activity or NavGraph."
+  },
+  {
+    "q": "What is true about activity-scoped ViewModels?",
+    "options": [
+      "Different composables in the same activity can receive the same ViewModel instance",
+      "Each composable always gets a different instance",
+      "They are cleared on every recomposition",
+      "They only work for one screen in the activity"
+    ],
+    "correct": 0,
+    "why": "An activity-scoped ViewModel can be shared by multiple composables in that activity."
+  },
+  {
+    "q": "What is a benefit of a NavGraph-scoped ViewModel?",
+    "options": [
+      "It is automatically cleared when the user exits that navigation graph",
+      "It becomes global for the entire app forever",
+      "It removes the need for a NavHost",
+      "It bypasses lifecycle management"
+    ],
+    "correct": 0,
+    "why": "A NavGraph-scoped ViewModel can be shared within that flow and is cleared when the graph is popped."
+  },
+  {
+    "q": "Which statement about <code>viewModel()</code> is correct?",
+    "options": [
+      "It is a lookup that retrieves or creates an instance based on scope, class, and key",
+      "It is just a constructor wrapper that always creates a new instance",
+      "It ignores scope completely",
+      "It only works when called from an Activity"
+    ],
+    "correct": 0,
+    "why": "<code>viewModel()</code> is a lookup, not a simple constructor call. Identity depends on scope, class, and key."
+  },
+  {
+    "q": "What should a ViewModel never depend on?",
+    "options": [
+      "Composables, Android UI objects, and navigation controllers",
+      "Kotlin properties",
+      "User input events",
+      "State holders"
+    ],
+    "correct": 0,
+    "why": "The boundary rule is that the ViewModel stays UI-framework-agnostic. It should not know composables, UI objects, or navigation controllers."
+  },
+  {
+    "q": "Which tool is the best fit for screen logic and data such as carts or forms?",
+    "options": [
+      "ViewModel",
+      "remember",
+      "A normal local variable",
+      "A route string"
+    ],
+    "correct": 0,
+    "why": "The lecture maps screen logic and data to ViewModel because it survives rotation and follows screen/nav scope."
+  },
+  {
+    "q": "What is the difference between a back stack and a back stack entry?",
+    "options": [
+      "The back stack is the whole stack of visited screens; a back stack entry is one specific screen instance in that stack",
+      "They are exactly the same thing",
+      "A back stack entry is always the root graph",
+      "The back stack exists only for deep links"
+    ],
+    "correct": 0,
+    "why": "The lecture uses the analogy of a whole stack of folders versus one folder inside that stack."
+  },
+  {
+    "q": "What does it mean that Jetpack Compose is declarative?",
+    "options": [
+      "The UI is a function of state",
+      "You update widgets by calling setter methods on them directly",
+      "The UI never recomposes",
+      "Only XML decides the final UI"
+    ],
+    "correct": 0,
+    "why": "In Compose, you update state and the UI redraws from that state. The slide summarizes this as UI = f(state)."
+  },
+  {
+    "q": "<pre class=\"code-block\">@Composable\nfun Counter() {\n    var count = 0\n    Button(onClick = { count++ }) {\n        Text(\"Count: $count\")\n    }\n}</pre>\nIf the user taps the button 3 times, what does the UI display?",
+    "options": [
+      "Count: 3",
+      "Count: 1",
+      "Count: 0",
+      "Compilation Error"
+    ],
+    "correct": 2,
+    "why": "A plain local variable is not Compose state. Without <code>mutableStateOf</code>, Compose does not treat it as observable state for the UI."
+  },
+  {
+    "q": "Why is calling a heavy database function directly inside a composable body a bad idea?",
+    "options": [
+      "Because recomposition can rerun the function many times and freeze the UI",
+      "Because composables cannot call any functions",
+      "Because Compose disables database access completely",
+      "Because database calls automatically survive rotation"
+    ],
+    "correct": 0,
+    "why": "Recomposition can happen often. Expensive work inside the composable body may rerun repeatedly and hurt UI performance."
+  },
+  {
+    "q": "Why does modifier order matter in Compose?",
+    "options": [
+      "Modifiers wrap elements like layers, so changing the order changes the result",
+      "Only the first modifier is applied",
+      "Modifier order matters only for navigation",
+      "All modifier orders produce identical UI"
+    ],
+    "correct": 0,
+    "why": "Modifiers apply outside-in. For example, <code>padding().background()</code> is visually different from <code>background().padding()</code>."
+  },
+  {
+    "q": "Which statement best describes <code>mutableStateOf</code> and <code>remember</code>?",
+    "options": [
+      "<code>mutableStateOf</code> creates observable state; <code>remember</code> stores it across recompositions",
+      "<code>remember</code> creates observable state; <code>mutableStateOf</code> saves it to disk",
+      "They are identical APIs with different names",
+      "Neither is related to state management"
+    ],
+    "correct": 0,
+    "why": "<code>mutableStateOf</code> makes a value observable to Compose, while <code>remember</code> keeps the value across recompositions."
+  },
+  {
+    "q": "<pre class=\"code-block\">@Composable\nfun NameInput() {\n    var text by mutableStateOf(\"\")\n    TextField(\n        value = text,\n        onValueChange = { text = it }\n    )\n}</pre>\nThe user types the letter <code>A</code> and the function recomposes. What is the value of <code>text</code> immediately after redraw?",
+    "options": [
+      "A",
+      "An empty string",
+      "null",
+      "The app crashes"
+    ],
+    "correct": 1,
+    "why": "Without <code>remember</code>, the state is recreated every time the composable reruns. This is the slide's \"recomposition amnesia\" problem."
+  },
+  {
+    "q": "What happens if a counter stored with <code>remember { mutableStateOf(5) }</code> is rotated?",
+    "options": [
+      "It persists as 5",
+      "It resets because <code>remember</code> survives recomposition, not activity destruction",
+      "It throws an exception",
+      "It becomes shared across all screens"
+    ],
+    "correct": 1,
+    "why": "<code>remember</code> does not survive activity recreation on rotation. Use <code>rememberSaveable</code> for simple saved UI state or ViewModel for more complex logic."
+  },
+  {
+    "q": "Which storage choices survive both recomposition and rotation?",
+    "options": [
+      "<code>remember</code> only",
+      "<code>rememberSaveable</code> and ViewModel",
+      "A standard local variable only",
+      "A route string only"
+    ],
+    "correct": 1,
+    "why": "The lifecycle survival cheat sheet shows <code>rememberSaveable</code> and ViewModel surviving both recomposition and rotation."
+  },
+  {
+    "q": "Which storage type survives recomposition but not rotation?",
+    "options": [
+      "Standard local variable",
+      "<code>remember</code>",
+      "<code>rememberSaveable</code>",
+      "ViewModel"
+    ],
+    "correct": 1,
+    "why": "<code>remember</code> survives recomposition but is lost when the activity is destroyed and recreated on rotation."
+  },
+  {
+    "q": "What is state hoisting?",
+    "options": [
+      "Moving state up to a common ancestor so children become stateless and reusable",
+      "Saving all state in a global variable",
+      "Keeping state only inside child composables",
+      "Passing NavController to every child"
+    ],
+    "correct": 0,
+    "why": "State hoisting means the parent owns the truth and children receive current values plus callbacks/events."
+  },
+  {
+    "q": "Why is creating a local editable copy of a user object inside a child composable an architectural anti-pattern?",
+    "options": [
+      "It creates two sources of truth and breaks unidirectional data flow",
+      "It always causes a memory leak",
+      "It makes the user object immutable",
+      "It requires rememberSaveable"
+    ],
+    "correct": 0,
+    "why": "The lecture says the parent already has one source of truth. A separate child copy can diverge and break the data flow."
+  },
+  {
+    "q": "If Screen B changes a counter and Screen A must see the same updated value, where should the state live?",
+    "options": [
+      "Inside Screen A only",
+      "Inside Screen B only",
+      "In the lowest common ancestor or a shared parent-scoped ViewModel",
+      "Inside a random global variable"
+    ],
+    "correct": 2,
+    "why": "Shared sibling state should be hoisted to the lowest common ancestor, or to a shared scoped ViewModel, so both screens observe one source of truth."
+  },
+  {
+    "q": "Why do tabs remain visible when a <code>NavHost</code> is placed inside a <code>BottomNavigation</code> area and you navigate to a details screen?",
+    "options": [
+      "Because the NavHost only swaps content inside its own bounds",
+      "Because BottomNavigation disables navigation",
+      "Because details screens cannot be full-screen",
+      "Because NavHost ignores the back stack"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that host placement matters. A NavHost changes only the pixels inside its own container."
+  },
+  {
+    "q": "Why should you pass only an ID, not a full user object, through a Compose navigation route?",
+    "options": [
+      "Because routes are strings/URLs with limits, so the destination should fetch the full data using the ID",
+      "Because IDs survive process death but objects do not",
+      "Because Compose cannot handle integers",
+      "Because navigation routes only accept Booleans"
+    ],
+    "correct": 0,
+    "why": "Compose routes are strings/URLs. Pass a stable ID in the route and let the destination fetch the full object."
+  },
+  {
+    "q": "If you call <code>navController.navigate(\"auth\")</code> and <code>auth</code> is a nested navigation graph whose start destination is <code>login</code>, which screen is shown?",
+    "options": [
+      "A blank auth screen",
+      "The login screen",
+      "The register screen",
+      "A navigation error"
+    ],
+    "correct": 1,
+    "why": "Navigating to a nested graph route resolves to that graph's configured <code>startDestination</code>, which is <code>login</code> here."
+  },
+  {
+    "q": "Which URL matches the deep link pattern <code>https://example.com/user/{id}</code>?",
+    "options": [
+      "https://example.com/user",
+      "https://example.com/settings/123",
+      "https://example.com/user/42",
+      "https://example.com/42/user"
+    ],
+    "correct": 2,
+    "why": "The placeholder <code>{id}</code> represents one path segment, so the URL structure must match exactly."
+  },
+  {
+    "q": "Why is a ViewModel preferred over a global variable or Activity property for UI-related data?",
+    "options": [
+      "Because ViewModel is lifecycle-conscious and survives configuration changes cleanly",
+      "Because global variables cannot store objects",
+      "Because Activity properties automatically persist forever",
+      "Because ViewModel replaces all repositories"
+    ],
+    "correct": 0,
+    "why": "The slide emphasizes lifecycle survival. ViewModel preserves UI-related state across rotation in a structured way."
+  },
+  {
+    "q": "Screen A and Screen B each call <code>viewModel()</code>, but they belong to different scopes. What should you expect?",
+    "options": [
+      "The same instance will always be returned",
+      "Different scopes produce different ViewModel instances",
+      "Both screens share state automatically",
+      "The app crashes unless a key is provided"
+    ],
+    "correct": 1,
+    "why": "Different scopes mean different owners, so separate instances are created. To share state, hoist the scope to a parent."
+  },
+  {
+    "q": "MyScreen recomposes 50 times in one second and contains <code>val viewModel: MyVM = viewModel()</code>. How many ViewModel instances are created?",
+    "options": [
+      "50 instances",
+      "1 instance",
+      "1 per configuration change",
+      "It depends on memory pressure"
+    ],
+    "correct": 1,
+    "why": "Frequent recomposition does not recreate the ViewModel. The same cached instance is returned within the same scope."
+  },
+  {
+    "q": "A screen-scoped ViewModel survives these actions in order: rotate device, press Home, return to app, press Back. At which step is <code>onCleared()</code> called?",
+    "options": [
+      "Step 1",
+      "Step 2",
+      "Step 3",
+      "Step 4"
+    ],
+    "correct": 3,
+    "why": "ViewModels survive configuration change and backgrounding. They are cleared when the user logically exits the scope, which happens on Back in Step 4."
+  },
+  {
+    "q": "In unidirectional data flow, what do the arrows from ViewModel to UI and from UI to ViewModel represent?",
+    "options": [
+      "Context / Intent",
+      "Events / State",
+      "State / Events",
+      "Layout / Logic"
+    ],
+    "correct": 2,
+    "why": "The golden rule is: state flows down from ViewModel to UI, and events flow up from UI to ViewModel."
+  },
+  {
+    "q": "Which statement matches the lecture's UDF rule?",
+    "options": [
+      "The UI should directly modify ViewModel fields whenever a button is clicked",
+      "The UI should send events; the ViewModel decides if and how state changes",
+      "The ViewModel should call composables to redraw the screen",
+      "Both UI and ViewModel should mutate the same field directly"
+    ],
+    "correct": 1,
+    "why": "The lecture says the ViewModel is the authority. The UI sends events, and the ViewModel decides how state changes."
+  },
+  {
+    "q": "Which state holder is most suitable for a small temporary UI value that only needs to survive recomposition?",
+    "options": [
+      "<code>remember</code>",
+      "<code>rememberSaveable</code>",
+      "ViewModel",
+      "NavBackStackEntry"
+    ],
+    "correct": 0,
+    "why": "<code>remember</code> is appropriate for small ephemeral UI state that does not need to survive rotation."
+  },
+  {
+    "q": "Which state holder is most suitable for simple input text that should survive rotation?",
+    "options": [
+      "<code>remember</code>",
+      "<code>rememberSaveable</code>",
+      "A plain local variable",
+      "A route argument"
+    ],
+    "correct": 1,
+    "why": "<code>rememberSaveable</code> is intended for simple UI state that should survive configuration changes."
+  },
+  {
+    "q": "Which state holder is most suitable for shared business logic across destinations?",
+    "options": [
+      "<code>remember</code>",
+      "<code>rememberSaveable</code>",
+      "ViewModel in an appropriate parent scope",
+      "A modifier chain"
+    ],
+    "correct": 2,
+    "why": "Shared business logic and shared source-of-truth state should live in a ViewModel scoped to the right owner."
+  },
+  {
+    "q": "What is the best interpretation of the slide on number input?",
+    "options": [
+      "Setting a numeric keyboard type does not guarantee only digits are entered, so validation/filtering is still needed",
+      "Numeric keyboard type makes non-digit input impossible in every case",
+      "Number input must always be stored in a ViewModel",
+      "Compose TextField cannot accept numbers"
+    ],
+    "correct": 0,
+    "why": "The slide shows that even with a number keyboard, alphabet characters can still appear in some situations. Input should still be validated or filtered."
+  },
+  {
+    "q": "Which TextField attributes were explicitly listed in the revision slides?",
+    "options": [
+      "<code>maxLines</code>, <code>singleLine</code>, and <code>enabled</code>",
+      "<code>room</code>, <code>dao</code>, and <code>entity</code>",
+      "<code>route</code>, <code>deepLink</code>, and <code>graph</code>",
+      "<code>padding</code>, <code>weight</code>, and <code>align</code>"
+    ],
+    "correct": 0,
+    "why": "The revision slide names <code>maxLines</code>, <code>singleLine</code>, and <code>enabled</code> as common TextField attributes."
+  },
+  {
+    "q": "In the revision slides, what is \"state\"?",
+    "options": [
+      "Any value that can change over time",
+      "Only values stored in a database",
+      "A notification that a click happened",
+      "A modifier applied to a composable"
+    ],
+    "correct": 0,
+    "why": "The slide defines state broadly as any value that can change over time."
+  },
+  {
+    "q": "In the revision slides, what is an event?",
+    "options": [
+      "A notification that something has been triggered",
+      "A value that survives rotation automatically",
+      "A route inside a NavHost",
+      "A stable painter parameter"
+    ],
+    "correct": 0,
+    "why": "The slide defines an event as something that notifies that an action or trigger occurred."
+  },
+  {
+    "q": "What solution was suggested for instability involving <code>painterResource</code> in an Image composable?",
+    "options": [
+      "Wrap the Image in another composable that is parameterless or has only stable parameters, or use a vector image",
+      "Move all state into a global variable",
+      "Replace the NavHost with multiple activities",
+      "Call <code>viewModel()</code> inside every row item"
+    ],
+    "correct": 0,
+    "why": "The slide suggests isolating <code>painterResource</code> in a parameterless/stable-parameter composable, or using a vector image."
+  },
+  {
+    "q": "Which statement best matches the lecture's lifecycle survival cheat sheet?",
+    "options": [
+      "A standard local variable survives recomposition and rotation",
+      "<code>remember</code> survives rotation but not recomposition",
+      "<code>rememberSaveable</code> and ViewModel both survive rotation",
+      "ViewModel is cleared on every recomposition"
+    ],
+    "correct": 2,
+    "why": "The cheat sheet shows that local variables survive neither, <code>remember</code> survives recomposition only, and both <code>rememberSaveable</code> and ViewModel survive rotation."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>

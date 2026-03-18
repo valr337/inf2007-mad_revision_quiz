@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Lecture 8 MCQ Quiz: Hilt & Retrofit</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Lecture 8 MCQ Quiz: Hilt & Retrofit</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Lecture 8</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Based on lecture material. This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "What does DI stand for in Android app architecture?",
+    "options": [
+      "Dependency Injection",
+      "Data Integration",
+      "Dynamic Initialization",
+      "Dependency Inspection"
+    ],
+    "correct": 0,
+    "why": "The lecture introduces DI as Dependency Injection."
+  },
+  {
+    "q": "In the context of DI, what are dependencies?",
+    "options": [
+      "Required classes or objects that another class needs to function",
+      "Only XML resources used by an Activity",
+      "Any global variables in the project",
+      "Only data stored in Room"
+    ],
+    "correct": 0,
+    "why": "The slides state that classes often require references to other classes, and these required classes are called dependencies."
+  },
+  {
+    "q": "What is the general idea of dependency injection?",
+    "options": [
+      "Have the dependency supplied as a parameter from outside",
+      "Instantiate every dependency inside the class that uses it",
+      "Store every dependency in a singleton object",
+      "Replace all constructors with static methods"
+    ],
+    "correct": 0,
+    "why": "DI means the dependency is supplied externally, instead of being created directly inside the dependent class."
+  },
+  {
+    "q": "Why is DI well-suited to Android development according to the lecture?",
+    "options": [
+      "It improves reusability, refactoring, and testing",
+      "It removes the need for lifecycle handling",
+      "It eliminates all annotations",
+      "It makes every class a singleton"
+    ],
+    "correct": 0,
+    "why": "The lecture lists reusability of code, ease of refactoring, and ease of testing as DI advantages."
+  },
+  {
+    "q": "In the following comparison, which version uses DI?<pre class=\"code-block\">class Car {\n    private val engine = Engine()\n}\n\nclass Car(val engine: Engine)</pre>",
+    "options": [
+      "The second version, because Engine is supplied through the constructor",
+      "The first version, because it directly creates Engine",
+      "Both are DI because both use Engine",
+      "Neither, because DI requires Hilt"
+    ],
+    "correct": 0,
+    "why": "The second version uses constructor injection because Engine is provided from outside."
+  },
+  {
+    "q": "What changes when moving from `private val engine = Engine()` to `class Car(val engine: Engine)`?",
+    "options": [
+      "Initialization of the dependency moves outside the class",
+      "The class can no longer call `engine.start()`",
+      "The dependency becomes optional by default",
+      "The dependency is automatically saved to disk"
+    ],
+    "correct": 0,
+    "why": "DI moves dependency initialization outside the dependent class."
+  },
+  {
+    "q": "According to the lecture, where is the dependency initialization done when DI is used?",
+    "options": [
+      "Outside the dependent class",
+      "Inside the ViewModel only",
+      "In the XML layout file",
+      "Inside the AndroidManifest"
+    ],
+    "correct": 0,
+    "why": "The DI slide explicitly states that initialization of the dependency is done outside."
+  },
+  {
+    "q": "Which of the following is an example of supplying a dependency from outside?",
+    "options": [
+      "val car = Car(Engine())",
+      "class Car { private val engine = Engine() }",
+      "object EngineHolder { val engine = null }",
+      "fun start() = Engine().start()"
+    ],
+    "correct": 0,
+    "why": "Creating the Engine externally and passing it into Car is DI."
+  },
+  {
+    "q": "What role does a factory play in DI, based on the lecture examples?",
+    "options": [
+      "It can create an object outside the consuming class before injection",
+      "It replaces Hilt entirely in all Android apps",
+      "It makes every dependency ActivityScoped",
+      "It serializes dependencies into JSON"
+    ],
+    "correct": 0,
+    "why": "The lecture shows a UserFactory creating a User before UserService receives it."
+  },
+  {
+    "q": "What is Hilt?",
+    "options": [
+      "A dependency injection framework for Android",
+      "A navigation library for fragments only",
+      "A JSON parser built on Room",
+      "A replacement for Kotlin coroutines"
+    ],
+    "correct": 0,
+    "why": "The lecture defines Hilt as a dependency injection framework and an Android-localized version of Dagger."
+  },
+  {
+    "q": "Hilt is described in the lecture as an Android-oriented version of which framework?",
+    "options": [
+      "Dagger",
+      "Retrofit",
+      "Ktor",
+      "Glide"
+    ],
+    "correct": 0,
+    "why": "The lecture describes Hilt as an Android localization of Dagger."
+  },
+  {
+    "q": "What mechanism does Hilt rely on to generate the injection code?",
+    "options": [
+      "Annotation processing and code generation",
+      "Reflection only",
+      "Manual XML registration",
+      "Bytecode patching at runtime"
+    ],
+    "correct": 0,
+    "why": "The slide states that Hilt is based on annotation processing and code generation."
+  },
+  {
+    "q": "What convenience does Hilt provide for Android classes?",
+    "options": [
+      "It automatically injects Android classes at suitable initialization points like `onCreate()`",
+      "It removes the need for constructors",
+      "It converts all classes into composables",
+      "It stores objects in SharedPreferences"
+    ],
+    "correct": 0,
+    "why": "The lecture states that Hilt automatically injects Android classes and finds suitable initialization points like `onCreate()`."
+  },
+  {
+    "q": "Which statement about Hilt and manual DI is correct?",
+    "options": [
+      "DI can still be done manually without Hilt",
+      "DI is impossible without Hilt",
+      "Hilt is required for constructor parameters in Kotlin",
+      "Manual DI only works in Java, not Kotlin"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly notes that DI can be done manually without Hilt."
+  },
+  {
+    "q": "Which annotation should be applied to the `Application` class when setting up Hilt?",
+    "options": [
+      "@HiltAndroidApp",
+      "@AndroidEntryPoint",
+      "@HiltViewModel",
+      "@InstallIn"
+    ],
+    "correct": 0,
+    "why": "The lecture shows `@HiltAndroidApp` on the Application class."
+  },
+  {
+    "q": "Which annotation enables Hilt injection into an Activity?",
+    "options": [
+      "@AndroidEntryPoint",
+      "@Inject",
+      "@Provides",
+      "@AssistedInject"
+    ],
+    "correct": 0,
+    "why": "The lecture shows `@AndroidEntryPoint` on `MainActivity`."
+  },
+  {
+    "q": "Which pair is used for Hilt-enabled ViewModels in the lecture?",
+    "options": [
+      "@HiltViewModel and `hiltViewModel()`",
+      "@AndroidEntryPoint and `viewModel()`",
+      "@Inject and `remember`",
+      "@Provides and `mutableStateOf()`"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly lists `@HiltViewModel` and `hiltViewModel()` for ViewModels."
+  },
+  {
+    "q": "Which code correctly marks a Hilt ViewModel?",
+    "options": [
+      "<pre class=\"code-block\">@HiltViewModel\nclass MainViewModel @Inject constructor(...) : ViewModel()</pre>",
+      "<pre class=\"code-block\">@AndroidEntryPoint\nclass MainViewModel(...) : ViewModel()</pre>",
+      "<pre class=\"code-block\">@Provides\nclass MainViewModel(...) : ViewModel()</pre>",
+      "<pre class=\"code-block\">@InstallIn\nclass MainViewModel(...) : ViewModel()</pre>"
+    ],
+    "correct": 0,
+    "why": "The lecture uses `@HiltViewModel` together with an `@Inject` constructor on the ViewModel."
+  },
+  {
+    "q": "Which function is used inside a composable to obtain a Hilt-provided ViewModel?",
+    "options": [
+      "hiltViewModel()",
+      "injectViewModel()",
+      "rememberViewModel()",
+      "getHiltViewModel()"
+    ],
+    "correct": 0,
+    "why": "The lecture shows `fun MainScreen(viewModel: MainViewModel = hiltViewModel())`."
+  },
+  {
+    "q": "According to the lecture, what are the two common ways to provide dependencies in Hilt?",
+    "options": [
+      "Use `@Inject`, or use `@Module` with `@Provides` / `@Binds` and `@InstallIn`",
+      "Use only XML, or use reflection",
+      "Use `remember`, or use `rememberSaveable`",
+      "Use `Intent`, or use `Bundle`"
+    ],
+    "correct": 0,
+    "why": "The Hilt slide lists these two common approaches."
+  },
+  {
+    "q": "When using `@Inject`, what requirement does the lecture emphasize?",
+    "options": [
+      "The dependency must also be provided by Hilt",
+      "The dependency must be declared in AndroidManifest",
+      "The dependency must be a data class",
+      "The dependency must implement Parcelable"
+    ],
+    "correct": 0,
+    "why": "Once using `@Inject`, the dependency needs to be provided by Hilt as well."
+  },
+  {
+    "q": "Why is the following constructor parameter invalid in a Hilt-injected class?<pre class=\"code-block\">class TestData @Inject constructor(\n    testDependency: TestDependency()\n)</pre>",
+    "options": [
+      "Because Hilt expects the dependency to be injected, not manually constructed in the parameter list",
+      "Because Kotlin does not allow constructor parameters",
+      "Because `TestDependency` must extend ViewModel",
+      "Because `@Inject` can only be used in Activities"
+    ],
+    "correct": 0,
+    "why": "The lecture shows that `testDependency: TestDependency` is valid, but manually calling `TestDependency()` there is not."
+  },
+  {
+    "q": "What is the purpose of `@Module` in Hilt?",
+    "options": [
+      "To define a class or object that provides dependencies",
+      "To mark a composable as reusable",
+      "To create navigation routes",
+      "To register Room entities"
+    ],
+    "correct": 0,
+    "why": "A module file is used to provide dependencies."
+  },
+  {
+    "q": "What kind of Kotlin type can be annotated with `@Module` according to the lecture?",
+    "options": [
+      "An object or an abstract class",
+      "Only a data class",
+      "Only an interface",
+      "Only a fragment"
+    ],
+    "correct": 0,
+    "why": "The lecture says to create an object or abstract class and annotate it with `@Module`."
+  },
+  {
+    "q": "What does a function annotated with `@Provides` do?",
+    "options": [
+      "It returns an instance of a dependency for Hilt to supply",
+      "It navigates to another screen",
+      "It scopes a ViewModel to a route",
+      "It observes LiveData"
+    ],
+    "correct": 0,
+    "why": "A `@Provides` function returns the dependency instance that Hilt can use."
+  },
+  {
+    "q": "When is `@Binds` commonly used according to the lecture?",
+    "options": [
+      "For binding an interface to its own implementation",
+      "For creating Retrofit converters",
+      "For saving state across rotation",
+      "For launching coroutines"
+    ],
+    "correct": 0,
+    "why": "The slide notes `bindXYZ(): XYZ` is for own interface implementation binding."
+  },
+  {
+    "q": "What does `@InstallIn` specify in a Hilt module?",
+    "options": [
+      "Which Hilt component and lifecycle the provided dependency belongs to",
+      "Which XML layout to inflate",
+      "Which Gradle plugin to apply",
+      "Which coroutine dispatcher to use"
+    ],
+    "correct": 0,
+    "why": "`@InstallIn` tells Hilt which component associated with an Android lifecycle should receive the dependency."
+  },
+  {
+    "q": "In the lecture's Room example, which component is the database module installed in?",
+    "options": [
+      "SingletonComponent",
+      "ActivityComponent",
+      "FragmentComponent",
+      "ViewComponent"
+    ],
+    "correct": 0,
+    "why": "The example uses `@InstallIn(SingletonComponent::class)`."
+  },
+  {
+    "q": "Why is `@Singleton` used on `provideDataBase(...)` in the Room module example?",
+    "options": [
+      "To reuse the same database instance for the application's lifetime",
+      "To make the database observable in Compose",
+      "To force Room to run on the main thread",
+      "To make the DAO Parcelable"
+    ],
+    "correct": 0,
+    "why": "A singleton-scoped dependency in `SingletonComponent` lives for the whole application."
+  },
+  {
+    "q": "What does Hilt do by default when no scope annotation is applied?",
+    "options": [
+      "Each `@Inject` request creates a new instance",
+      "It always uses one singleton instance",
+      "It always stores the instance in the ViewModel",
+      "It injects nothing until manually refreshed"
+    ],
+    "correct": 0,
+    "why": "The component scopes slide states that by default each `@Inject` creates a new instance."
+  },
+  {
+    "q": "What does `@Singleton` indicate when used with `SingletonComponent`?",
+    "options": [
+      "The same instance is provided throughout the life of the application",
+      "A new instance is created for every Activity",
+      "The object is shared only within a single composable",
+      "The object is destroyed after every function call"
+    ],
+    "correct": 0,
+    "why": "`@Singleton` with `SingletonComponent` means one shared instance for the app lifetime."
+  },
+  {
+    "q": "What does `@ActivityScoped` indicate?",
+    "options": [
+      "The same instance is reused throughout the corresponding Activity lifecycle",
+      "The same instance is reused for the whole app",
+      "A new instance is created on every recomposition",
+      "The dependency is stored in SavedStateHandle"
+    ],
+    "correct": 0,
+    "why": "The lecture states that `@ActivityScoped` provides the same instance throughout the life of the corresponding activity."
+  },
+  {
+    "q": "Why is ViewModel described as a bit special in the Hilt lecture?",
+    "options": [
+      "It is created conventionally but retrieved in composables using `hiltViewModel()`",
+      "It cannot use constructor injection",
+      "It must always be provided by `@Provides`",
+      "It is the only dependency that cannot have scope"
+    ],
+    "correct": 0,
+    "why": "The slide explains that ViewModel is created like a conventional constructor but used through `hiltViewModel()` in composables."
+  },
+  {
+    "q": "When would you pass a `backStackEntry` to `hiltViewModel()`?",
+    "options": [
+      "When you need a ViewModel scoped to a navigation route or navigation graph",
+      "When you need to parse JSON",
+      "When you want to create a Room database",
+      "When you want to call OkHttp directly"
+    ],
+    "correct": 0,
+    "why": "The lecture says to pass the corresponding backStackEntry when retrieving a ViewModel scoped to navigation routes or a navigation graph."
+  },
+  {
+    "q": "What problem does Assisted Injection solve for Hilt ViewModels?",
+    "options": [
+      "Supplying runtime parameters such as navigation arguments",
+      "Automatically creating Room entities",
+      "Removing the need for `@HiltViewModel`",
+      "Converting Flow into LiveData"
+    ],
+    "correct": 0,
+    "why": "The lecture says Assisted Injection is used when a runtime parameter is required, such as from navigation."
+  },
+  {
+    "q": "Which annotation marks a runtime-provided parameter in an assisted ViewModel constructor?",
+    "options": [
+      "@Assisted",
+      "@Provides",
+      "@Named",
+      "@AndroidEntryPoint"
+    ],
+    "correct": 0,
+    "why": "The example shows `@Assisted val runtimeArg: String`."
+  },
+  {
+    "q": "Which annotation is used on the constructor of an assisted Hilt ViewModel?",
+    "options": [
+      "@AssistedInject",
+      "@Inject",
+      "@Binds",
+      "@Singleton"
+    ],
+    "correct": 0,
+    "why": "The lecture example uses `@AssistedInject constructor(...)`."
+  },
+  {
+    "q": "What is the role of an `@AssistedFactory` in the lecture example?",
+    "options": [
+      "It defines a `create(...)` function to construct the ViewModel with runtime arguments",
+      "It converts network responses into JSON",
+      "It marks a class as ActivityScoped",
+      "It binds an interface to two implementations"
+    ],
+    "correct": 0,
+    "why": "The factory interface is used to create the assisted ViewModel with the required runtime argument."
+  },
+  {
+    "q": "In the assisted ViewModel example, what is stored in `lastNumber`?",
+    "options": [
+      "A `StateFlow<String>` initialized from the runtime argument",
+      "A Room DAO instance",
+      "A Retrofit service",
+      "An `Int` stored in SharedPreferences"
+    ],
+    "correct": 0,
+    "why": "The example initializes `lastNumber` as `MutableStateFlow(\"$runtimeArg\")`."
+  },
+  {
+    "q": "What is the purpose of `creationCallback` in the assisted `hiltViewModel` call?",
+    "options": [
+      "To call the factory and pass the runtime argument during ViewModel creation",
+      "To run a network request after composition",
+      "To install a Hilt module dynamically",
+      "To bind two interfaces together"
+    ],
+    "correct": 0,
+    "why": "The lecture shows `creationCallback = { factory -> factory.create(runtimeArg = key.lastNumber) }`."
+  },
+  {
+    "q": "Why are `@Qualifier` and `@Named` used in Hilt?",
+    "options": [
+      "To differentiate between dependencies of the same type",
+      "To make dependencies singleton automatically",
+      "To enable Retrofit coroutines",
+      "To define Room table names"
+    ],
+    "correct": 0,
+    "why": "The lecture states that `@Qualifier` and `@Named` differentiate dependencies with the same type based on a key."
+  },
+  {
+    "q": "What is the benefit of defining custom qualifiers like `@Impl1` and `@Impl2`?",
+    "options": [
+      "They distinguish between multiple implementations of the same interface",
+      "They reduce the number of modules needed for Room",
+      "They replace `@Inject` on constructors",
+      "They persist state across process death"
+    ],
+    "correct": 0,
+    "why": "The example uses `@Impl1` and `@Impl2` to inject two different `TestService` implementations."
+  },
+  {
+    "q": "How does `@Named(\"String1\")` differ from a custom qualifier like `@Impl1`?",
+    "options": [
+      "It uses a string key instead of a custom annotation class",
+      "It can only be used in Activities",
+      "It always creates a singleton",
+      "It cannot be used with `@Inject` constructors"
+    ],
+    "correct": 0,
+    "why": "`@Named` differentiates same-type dependencies with a string label."
+  },
+  {
+    "q": "In the lecture example, what is injected into `string1` here?<pre class=\"code-block\">@Inject @Named(\"String1\")\nlateinit var string1: String</pre>",
+    "options": [
+      "The value returned by `provideString1()`",
+      "The value returned by `provideString2()`",
+      "Both strings concatenated together",
+      "A null value until first use"
+    ],
+    "correct": 0,
+    "why": "`@Named(\"String1\")` selects the provider associated with the same name."
+  },
+  {
+    "q": "What is Retrofit according to the lecture?",
+    "options": [
+      "A REST client based on OkHttp",
+      "A Room wrapper for SQLite only",
+      "A DI framework for Android",
+      "A replacement for coroutines"
+    ],
+    "correct": 0,
+    "why": "The lecture describes Retrofit as a Square REST client based on OkHttp."
+  },
+  {
+    "q": "What is one main purpose of Retrofit in Android apps?",
+    "options": [
+      "Mapping JSON responses to Kotlin objects",
+      "Managing navigation back stacks",
+      "Persisting local preferences",
+      "Creating dependency graphs manually"
+    ],
+    "correct": 0,
+    "why": "The lecture lists JSON mapping as one of Retrofit's purposes."
+  },
+  {
+    "q": "What is the purpose of `@SerializedName(\"id\")` in a Retrofit model class?",
+    "options": [
+      "To map a JSON field name to a Kotlin property",
+      "To inject the property with Hilt",
+      "To save the property into DataStore",
+      "To scope the property to the network layer"
+    ],
+    "correct": 0,
+    "why": "`@SerializedName` maps JSON keys to Kotlin properties."
+  },
+  {
+    "q": "In the lecture example, what does `RepoResponse` contain?",
+    "options": [
+      "A list of `Repo` objects in `items`",
+      "A single `Repo` object only",
+      "Only the HTTP status code",
+      "A list of Activity routes"
+    ],
+    "correct": 0,
+    "why": "The example defines `class RepoResponse(@SerializedName(\"items\") val items: List<Repo> = emptyList())`."
+  },
+  {
+    "q": "Why does the service function `searchRepos(...)` use `suspend`?",
+    "options": [
+      "Because it is intended to be called from a coroutine for an asynchronous network request",
+      "Because only ViewModels can call it",
+      "Because Retrofit requires all methods to return Flow",
+      "Because `@GET` only works with suspend in XML"
+    ],
+    "correct": 0,
+    "why": "The example declares the Retrofit API as a suspend function, which is the standard coroutine-based network style."
+  },
+  {
+    "q": "What does `@GET(\"search/repositories?sort=stars&q=Android\")` define?",
+    "options": [
+      "The endpoint path used for the HTTP GET request",
+      "A local SQLite query",
+      "A Hilt module name",
+      "A Compose route"
+    ],
+    "correct": 0,
+    "why": "In Retrofit, `@GET(...)` specifies the endpoint path for the request."
+  },
+  {
+    "q": "What do `@Query(\"page\")` and `@Query(\"per_page\")` do in the lecture example?",
+    "options": [
+      "They append query parameters to the GET request",
+      "They map JSON fields to properties",
+      "They scope the service to a ViewModel",
+      "They provide named Hilt dependencies"
+    ],
+    "correct": 0,
+    "why": "The annotations add request query parameters such as page and per_page."
+  },
+  {
+    "q": "Which sequence correctly builds the Retrofit service in the lecture example?",
+    "options": [
+      "Retrofit.Builder() → baseUrl(...) → addConverterFactory(...) → build() → create(...)",
+      "Retrofit.Builder() → create(...) → build() → baseUrl(...)",
+      "OkHttpClient() → create(...) → addQuery(...)",
+      "Request.Builder() → baseUrl(...) → execute()"
+    ],
+    "correct": 0,
+    "why": "The example builds Retrofit in that exact order."
+  },
+  {
+    "q": "According to the lecture comment, what is a better architectural place to build the Retrofit service?",
+    "options": [
+      "Inside a Hilt module and inject it as a dependency",
+      "Inside every composable that needs it",
+      "Inside the AndroidManifest",
+      "Inside the Room DAO"
+    ],
+    "correct": 0,
+    "why": "The slide comment says it is better to build this in `@Module` and `@Inject` as a dependency."
+  },
+  {
+    "q": "What does the following line return?<pre class=\"code-block\">val repoResponse = gitHubService.searchRepos(1, 50)</pre>",
+    "options": [
+      "A `RepoResponse`",
+      "A `List<Repo>` directly",
+      "A `String` containing raw JSON only",
+      "A `Request.Builder`"
+    ],
+    "correct": 0,
+    "why": "The Retrofit API method is declared to return `RepoResponse`."
+  },
+  {
+    "q": "What does this line extract?<pre class=\"code-block\">val repoItems = repoResponse.items</pre>",
+    "options": [
+      "The list of repositories inside the response",
+      "The Retrofit base URL",
+      "The query parameters used in the request",
+      "The HTTP headers"
+    ],
+    "correct": 0,
+    "why": "`items` is the list field in `RepoResponse`."
+  },
+  {
+    "q": "What does this expression produce if no repository name matches?<pre class=\"code-block\">val filtered = repoItems.filter { it.name == searchName }.firstOrNull()</pre>",
+    "options": [
+      "null",
+      "An empty string",
+      "The first repository in the list",
+      "A network exception automatically"
+    ],
+    "correct": 0,
+    "why": "`firstOrNull()` returns null when no matching element exists."
+  },
+  {
+    "q": "What is OkHttp in relation to Retrofit, according to the lecture?",
+    "options": [
+      "The underlying HTTP client Retrofit is based on",
+      "A replacement for Hilt",
+      "A navigation library",
+      "A database ORM"
+    ],
+    "correct": 0,
+    "why": "The lecture states Retrofit is based on OkHttp."
+  },
+  {
+    "q": "Which object represents the HTTP client in the OkHttp example?",
+    "options": [
+      "OkHttpClient()",
+      "Request.Builder()",
+      "Retrofit.Builder()",
+      "RepoResponse()"
+    ],
+    "correct": 0,
+    "why": "The example starts with `val client = OkHttpClient()`."
+  },
+  {
+    "q": "What is the purpose of `Request.Builder()` in the OkHttp example?",
+    "options": [
+      "To build an HTTP request, including the target URL",
+      "To build a Hilt dependency graph",
+      "To create a Room database",
+      "To convert JSON into a data class"
+    ],
+    "correct": 0,
+    "why": "The example uses `Request.Builder().url(...).build()` to create the request."
+  },
+  {
+    "q": "What does `client.newCall(request).execute()` do?",
+    "options": [
+      "Creates a call object and sends the request to get a response",
+      "Caches the request for later without sending it",
+      "Creates a ViewModel for the current route",
+      "Converts the response into Flow automatically"
+    ],
+    "correct": 0,
+    "why": "The lecture comment explains that it creates a call object and uses `execute()` to send the query and get the reply."
+  },
+  {
+    "q": "What does `response.body?.string()` represent in the OkHttp example?",
+    "options": [
+      "The response data as a string",
+      "The request URL as a string",
+      "The query parameter list",
+      "The DI graph in text form"
+    ],
+    "correct": 0,
+    "why": "The lecture comment states that the response body string is the response data."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>

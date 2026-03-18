@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Lecture 10 MCQ Quiz: Background Work, Broadcast Receiver & Content Provider</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Lecture 10 MCQ Quiz: Background Work, Broadcast Receiver &amp; Content Provider</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Lecture 10</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Based on lecture material. This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "Which Android component is primarily used for long-running work that does not directly affect the UI?",
+    "options": [
+      "Service",
+      "Activity",
+      "Composable",
+      "Fragment"
+    ],
+    "correct": 0,
+    "why": "The lecture states that services are meant for tasks that do not need or affect the UI and are long running."
+  },
+  {
+    "q": "Why might an app use a service instead of keeping work inside an Activity?",
+    "options": [
+      "Because the work may need to continue beyond the visible Activity lifecycle",
+      "Because services automatically draw UI faster",
+      "Because services replace all permissions",
+      "Because Activities cannot launch background work"
+    ],
+    "correct": 0,
+    "why": "The slides ask what happens when work must continue beyond the visible box or even after the Activity shuts down; services exist for that purpose."
+  },
+  {
+    "q": "Which of the following is listed as a suitable service use case?",
+    "options": [
+      "Long-running network transactions",
+      "Drawing a button on screen",
+      "Inflating XML layouts",
+      "Changing a composable preview"
+    ],
+    "correct": 0,
+    "why": "Examples given for services include network transactions, continuous database transactions, and intensive long-running operations."
+  },
+  {
+    "q": "Which statement about Android services and the main thread is correct?",
+    "options": [
+      "Services run on the main thread by default, so long work should usually move to a background thread",
+      "Services always get their own worker thread automatically",
+      "Services cannot run code on the main thread",
+      "Services only run when an Activity is visible"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that all of the big 4 run on the main UI thread, so services can block the UI if long running unless you move the work to a background thread."
+  },
+  {
+    "q": "What are the two direct ways to start a service mentioned in the lecture?",
+    "options": [
+      "Start and bind",
+      "Launch and inflate",
+      "Create and observe",
+      "Push and pop"
+    ],
+    "correct": 0,
+    "why": "The slides explicitly list two ways to start a service: Start and Bind. Scheduled work is recommended through WorkManager instead."
+  },
+  {
+    "q": "For scheduled background work, which API does the lecture recommend using?",
+    "options": [
+      "WorkManager",
+      "NavController",
+      "LiveData",
+      "BroadcastReceiver"
+    ],
+    "correct": 0,
+    "why": "The slide states: Scheduled ~ use WorkManager."
+  },
+  {
+    "q": "What best describes a started service according to the lecture diagram?",
+    "options": [
+      "An Activity starts it, and there is typically no direct communication channel back",
+      "It can only be created by another service",
+      "It is visible on screen like an Activity",
+      "It cannot be stopped once started"
+    ],
+    "correct": 0,
+    "why": "The started service diagram shows startService() spawning a Service with “No communication” between Activity and Service."
+  },
+  {
+    "q": "In the lifecycle of a started service, where is the actual task work typically implemented?",
+    "options": [
+      "onStartCommand()",
+      "onResume()",
+      "onBind()",
+      "onPause()"
+    ],
+    "correct": 0,
+    "why": "The lecture says onStartCommand() is triggered where you actually implement the service tasks, normally in a separate thread."
+  },
+  {
+    "q": "What should a started service usually call when it finishes its work?",
+    "options": [
+      "stopSelf()",
+      "finish()",
+      "popBackStack()",
+      "invalidate()"
+    ],
+    "correct": 0,
+    "why": "The started service flow says to call stopSelf() when done, after which onDestroy() will be triggered."
+  },
+  {
+    "q": "What is a key characteristic of a bound service?",
+    "options": [
+      "Clients can communicate with the service through a binder interface",
+      "It can never be used by more than one Activity",
+      "It must always show a notification",
+      "It is automatically persistent across reboots"
+    ],
+    "correct": 0,
+    "why": "The bound service slides show that Activities can communicate with a bound service, for example sending pause actions and receiving playback updates."
+  },
+  {
+    "q": "In a bound service, what does each client call to obtain the IBinder interface?",
+    "options": [
+      "onBind()",
+      "onStartCommand()",
+      "onReceive()",
+      "doWork()"
+    ],
+    "correct": 0,
+    "why": "The bound service lifecycle states that each client calls onBind() to get the IBinder interface."
+  },
+  {
+    "q": "When does a bound service get destroyed according to the lecture?",
+    "options": [
+      "After all clients unbind and onDestroy() is triggered",
+      "Immediately after onBind() returns",
+      "As soon as one Activity pauses",
+      "Only when the phone reboots"
+    ],
+    "correct": 0,
+    "why": "The slide explains that when all clients call onUnbind(), onDestroy() is triggered and the bound service is destroyed."
+  },
+  {
+    "q": "What does the LocalBinder inside a local bound service usually provide to the client?",
+    "options": [
+      "A reference to the service instance so public methods can be called",
+      "A new Activity instance",
+      "Direct access to the manifest",
+      "A PendingIntent for notifications"
+    ],
+    "correct": 0,
+    "why": "The sample LocalBinder returns the LocalService instance, allowing clients to call public methods such as getSecret4DNum()."
+  },
+  {
+    "q": "In the client Activity example for a local bound service, when is bindService(...) called?",
+    "options": [
+      "Inside onStart()",
+      "Inside onDestroy()",
+      "Inside onCreateOptionsMenu()",
+      "Inside onActivityResult()"
+    ],
+    "correct": 0,
+    "why": "The client Activity sample binds to the service in onStart() using Context.BIND_AUTO_CREATE."
+  },
+  {
+    "q": "In the client Activity example, when is unbindService(connection) called?",
+    "options": [
+      "Inside onStop()",
+      "Inside onResume()",
+      "Inside onRestart()",
+      "Inside onSaveInstanceState()"
+    ],
+    "correct": 0,
+    "why": "The sample explicitly unbinds from the service in onStop()."
+  },
+  {
+    "q": "If a service must be used by other apps or other processes, which interface mechanism is recommended for sequential requests?",
+    "options": [
+      "Messenger",
+      "RecyclerView",
+      "SavedStateHandle",
+      "Room DAO"
+    ],
+    "correct": 0,
+    "why": "The lecture says Messenger should be used if requests from other apps can be handled sequentially."
+  },
+  {
+    "q": "When is AIDL more appropriate than Messenger for a bound service?",
+    "options": [
+      "When simultaneous processing of client requests is required",
+      "When only one local Activity uses the service",
+      "When the service needs no communication",
+      "When working only with notifications"
+    ],
+    "correct": 0,
+    "why": "The slide says AIDL is potentially complicated and should be used only when simultaneous processing of client requests is required."
+  },
+  {
+    "q": "What is the purpose of notifications in relation to background services?",
+    "options": [
+      "They let the user know what a background service is doing",
+      "They replace the need for services entirely",
+      "They automatically save work to Room",
+      "They force the app into landscape mode"
+    ],
+    "correct": 0,
+    "why": "The lecture states that notifications are a way to know what a background service is doing."
+  },
+  {
+    "q": "Which system service manages and displays notifications?",
+    "options": [
+      "NotificationManager",
+      "LocationManager",
+      "SensorManager",
+      "PackageManager"
+    ],
+    "correct": 0,
+    "why": "The notifications slide explicitly names NotificationManager as the system service that manages and displays notifications."
+  },
+  {
+    "q": "Why is PendingIntent used together with notifications?",
+    "options": [
+      "It lets another component such as NotificationManager execute your app's Intent later with the needed permissions",
+      "It makes the notification permanent forever",
+      "It converts a service into an Activity",
+      "It stores data inside SharedPreferences"
+    ],
+    "correct": 0,
+    "why": "The slides explain that PendingIntent transfers permissions from your app to NotificationManager and can start Activities, Services, or Broadcasts later."
+  },
+  {
+    "q": "Which call wraps an Intent so a notification can later launch an Activity?",
+    "options": [
+      "PendingIntent.getActivity(...)",
+      "Intent.getPending(...)",
+      "NotificationManager.wrapIntent(...)",
+      "ActivityResult.launch(...)"
+    ],
+    "correct": 0,
+    "why": "The lecture shows PendingIntent.getActivity(Context, int, Intent, int) for wrapping an Intent that later launches an Activity."
+  },
+  {
+    "q": "How many actions can a notification have according to the lecture slide?",
+    "options": [
+      "Up to 3 actions",
+      "Only 1 action",
+      "Up to 10 actions",
+      "Unlimited actions"
+    ],
+    "correct": 0,
+    "why": "The slide on notifications states that notifications can have up to 3 actions."
+  },
+  {
+    "q": "What is a foreground service?",
+    "options": [
+      "A service the user should be actively aware of, typically with an ongoing non-dismissible notification",
+      "A service that can only run while the Activity is resumed",
+      "A service used only for UI rendering",
+      "A service that cannot access the network"
+    ],
+    "correct": 0,
+    "why": "The lecture defines foreground services as services the user needs to be actively aware of, and they issue an ongoing non-dismissible notification."
+  },
+  {
+    "q": "Why are foreground services treated specially by Android?",
+    "options": [
+      "Android prioritizes them even when memory is constrained",
+      "They do not need any notification",
+      "They automatically survive device factory reset",
+      "They bypass all lifecycle callbacks"
+    ],
+    "correct": 0,
+    "why": "The foreground service slide states that Android prioritizes foreground services even if memory is constrained."
+  },
+  {
+    "q": "Which statement best matches the lecture's recommendation for WorkManager?",
+    "options": [
+      "It is the recommended solution for persistent work that remains scheduled through app restarts and system reboots",
+      "It is only for UI state restoration",
+      "It replaces every possible foreground service",
+      "It is used only for handling deep links"
+    ],
+    "correct": 0,
+    "why": "The WorkManager overview says it is the recommended solution for persistent work and remains scheduled through app restarts and system reboots."
+  },
+  {
+    "q": "Which method contains the main task logic inside a Worker subclass?",
+    "options": [
+      "doWork()",
+      "onReceive()",
+      "onBind()",
+      "onInflate()"
+    ],
+    "correct": 0,
+    "why": "The basic steps slide shows a Worker subclass overriding doWork() and returning a Result."
+  },
+  {
+    "q": "Which request type is shown in the lecture example when scheduling a single delayed worker?",
+    "options": [
+      "OneTimeWorkRequest",
+      "PeriodicWorkController",
+      "LiveDataRequest",
+      "IntentWorkRequest"
+    ],
+    "correct": 0,
+    "why": "The sample code uses OneTimeWorkRequest.Builder(SimpleWorker::class.java)."
+  },
+  {
+    "q": "After defining a WorkRequest, what method is used to submit it to WorkManager?",
+    "options": [
+      "enqueue()",
+      "dispatch()",
+      "navigate()",
+      "commitNow()"
+    ],
+    "correct": 0,
+    "why": "The lecture's step 3 says to submit the WorkRequest using WorkManager.getInstance(context).enqueue(request)."
+  },
+  {
+    "q": "Which option does the lecture recommend for general asynchronous work that is not necessarily persistent?",
+    "options": [
+      "Coroutines",
+      "BroadcastReceiver",
+      "Manifest intent filters",
+      "ContentProvider"
+    ],
+    "correct": 0,
+    "why": "The WorkManager usage slide distinguishes asynchronous work as Coroutines and background persistent work as WorkManager."
+  },
+  {
+    "q": "What does setExpedited() indicate in WorkManager according to the lecture?",
+    "options": [
+      "An important request, usually a short task that should start immediately",
+      "A request that must wait for device reboot",
+      "A request that can only run once per month",
+      "A request that always opens an Activity"
+    ],
+    "correct": 0,
+    "why": "The slide states that setExpedited() is for important requests, usually short tasks that start immediately."
+  },
+  {
+    "q": "When is setForegroundAsync() or setForeground() associated with WorkManager?",
+    "options": [
+      "For important or long-running work requests",
+      "Only for static broadcast receivers",
+      "Only for Room database migrations",
+      "Only for launcher Activities"
+    ],
+    "correct": 0,
+    "why": "The WorkManager usage slide notes setForegroundAsync()/setForeground() for important or long-running requests."
+  },
+  {
+    "q": "What architectural pattern do broadcast receivers implement according to the lecture?",
+    "options": [
+      "Publish-subscribe",
+      "Singleton",
+      "Factory",
+      "Decorator"
+    ],
+    "correct": 0,
+    "why": "The Broadcast Receivers slide says they implement a form of the Publish-Subscribe pattern."
+  },
+  {
+    "q": "From where can an app receive broadcasts?",
+    "options": [
+      "From the system and from other apps through custom broadcasts",
+      "Only from its own Activities",
+      "Only from WorkManager",
+      "Only from content providers"
+    ],
+    "correct": 0,
+    "why": "The lecture says apps can receive broadcasts from the system and from other apps via custom broadcasts."
+  },
+  {
+    "q": "Which statement about broadcast receivers is true?",
+    "options": [
+      "They can be triggered even when the app is not running",
+      "They always require the app UI to be visible",
+      "They can only receive explicit intents",
+      "They replace services for all background work"
+    ],
+    "correct": 0,
+    "why": "The slide explicitly notes that the broadcast receiver can be triggered when the app is not running."
+  },
+  {
+    "q": "What are system broadcasts?",
+    "options": [
+      "Special intents sent by Android when system events happen",
+      "Database callbacks from Room",
+      "Navigation events inside a NavHost",
+      "Only notifications with action buttons"
+    ],
+    "correct": 0,
+    "why": "The System Broadcasts slide defines them as special intents sent by the system when system events happen."
+  },
+  {
+    "q": "Most system broadcasts are what type of broadcast?",
+    "options": [
+      "Implicit broadcasts",
+      "Explicit broadcasts",
+      "Foreground broadcasts",
+      "Sticky services"
+    ],
+    "correct": 0,
+    "why": "The slide explicitly states that most system broadcasts are implicit broadcasts."
+  },
+  {
+    "q": "What does an IntentFilter indicate for a BroadcastReceiver or other component?",
+    "options": [
+      "Which implicit intents should trigger the component",
+      "How to draw the UI tree",
+      "How long a service sleeps",
+      "Which Room tables to query"
+    ],
+    "correct": 0,
+    "why": "The Intent Filters slide says intent filters indicate what implicit intents should trigger the component."
+  },
+  {
+    "q": "How can intent filters be declared according to the lecture?",
+    "options": [
+      "Statically in the manifest or dynamically in code",
+      "Only statically in XML",
+      "Only dynamically in ViewModel",
+      "Only inside a Worker subclass"
+    ],
+    "correct": 0,
+    "why": "The lecture explicitly says intent filters can be statically declared in the manifest or dynamically coded."
+  },
+  {
+    "q": "What is a key property of a static broadcast receiver?",
+    "options": [
+      "It can trigger on matching implicit intents even when the app is closed, subject to Android restrictions",
+      "It only exists while an Activity is resumed",
+      "It cannot be declared in the manifest",
+      "It is always preferred over dynamic registration"
+    ],
+    "correct": 0,
+    "why": "The static receiver slide says static BroadcastReceivers always trigger when the implicit intent is received, even when the app is closed, but later slides explain newer Android restrictions."
+  },
+  {
+    "q": "Why have static broadcast receivers become more restricted in newer Android versions?",
+    "options": [
+      "Because they are powerful and easily abused",
+      "Because they cannot receive system intents",
+      "Because they only work on tablets",
+      "Because they require Jetpack Compose"
+    ],
+    "correct": 0,
+    "why": "The lecture notes that static receivers are a powerful idea but easily abused, so restrictions became stricter in newer API levels."
+  },
+  {
+    "q": "Which broadcast registration style does the lecture recommend whenever possible?",
+    "options": [
+      "Dynamic broadcast receivers",
+      "Static manifest receivers for everything",
+      "Only ordered broadcasts",
+      "Only exported receivers"
+    ],
+    "correct": 0,
+    "why": "The Dynamic Broadcast Receivers slide says they exist only during the app lifecycle and explicitly says to use this whenever possible."
+  },
+  {
+    "q": "What is true about a dynamically registered broadcast receiver?",
+    "options": [
+      "It exists only during the app's lifecycle, such as while the Activity is running",
+      "It always survives process death",
+      "It must be declared in the manifest only",
+      "It can never receive system actions"
+    ],
+    "correct": 0,
+    "why": "The dynamic receiver slide states that dynamic BroadcastReceivers only exist in the app's lifecycle, meaning only when the app is running."
+  },
+  {
+    "q": "In the dynamic receiver example, where is the receiver registered and unregistered?",
+    "options": [
+      "Registered in onResume() and unregistered in onPause()",
+      "Registered in onCreate() and never unregistered",
+      "Registered in doWork() and unregistered in onStop()",
+      "Registered in onBind() and unregistered in onDestroy()"
+    ],
+    "correct": 0,
+    "why": "The lecture example registers the receiver in onResume() and unregisters it in onPause()."
+  },
+  {
+    "q": "What is the difference between sendBroadcast(intent) and sendOrderedBroadcast(intent, permission)?",
+    "options": [
+      "sendBroadcast sends to receivers in undefined order, while sendOrderedBroadcast delivers one at a time in order",
+      "sendBroadcast is only for the system, while sendOrderedBroadcast is only for Activities",
+      "sendOrderedBroadcast cannot carry extras",
+      "There is no difference"
+    ],
+    "correct": 0,
+    "why": "The Custom Broadcasts slide explains that sendBroadcast sends in undefined order, while sendOrderedBroadcast sends to receivers one at a time and can propagate cumulative results."
+  },
+  {
+    "q": "What can receivers do in an ordered broadcast chain?",
+    "options": [
+      "Propagate cumulative results to the next receiver",
+      "Render Compose UI directly in the status bar",
+      "Restart the device automatically",
+      "Bypass permissions"
+    ],
+    "correct": 0,
+    "why": "The lecture says ordered broadcasts allow receivers to propagate cumulative results to the next receiver."
+  },
+  {
+    "q": "How can the order of receivers be influenced for an ordered broadcast?",
+    "options": [
+      "Using android:priority",
+      "Using rememberSaveable",
+      "Using startForeground()",
+      "Using NavHost"
+    ],
+    "correct": 0,
+    "why": "The slide states that receiver order for ordered broadcasts can be defined using android:priority."
+  },
+  {
+    "q": "What additional protection can be applied when sending a custom broadcast?",
+    "options": [
+      "A permission can be specified so only receivers with that permission can receive it",
+      "A broadcast can be made into a fragment transaction",
+      "The broadcast automatically becomes encrypted by Room",
+      "The receiver no longer needs an intent filter"
+    ],
+    "correct": 0,
+    "why": "The custom broadcast example shows sendBroadcast(notiIntent, Manifest.permission.SEND_SMS), and the receiving app must request the same permission."
+  },
+  {
+    "q": "When should you consider using a ContentProvider according to the lecture?",
+    "options": [
+      "When you plan to share data across app boundaries",
+      "When you only need private state inside one composable",
+      "When you need navigation between two screens",
+      "When you want to replace NotificationManager"
+    ],
+    "correct": 0,
+    "why": "The overview slide explicitly says to use content providers when you plan to share data across app boundaries."
+  },
+  {
+    "q": "Which statement best describes what a content provider does?",
+    "options": [
+      "It encapsulates data and provides controlled access for the same app or other apps",
+      "It is only a UI rendering engine",
+      "It is a special kind of coroutine dispatcher",
+      "It is used only for notifications"
+    ],
+    "correct": 0,
+    "why": "The lecture says content providers help manage access to data stored by the app or other apps, encapsulate the data, and define data security."
+  },
+  {
+    "q": "Which is listed as a benefit of content providers?",
+    "options": [
+      "Granular control over and enforcement of permissions for data access",
+      "Automatic navigation graph generation",
+      "Guaranteed UI recomposition performance",
+      "Automatic foreground service creation"
+    ],
+    "correct": 0,
+    "why": "The benefits slide lists granular control and enforcement of permissions for accessing data as a key benefit."
+  },
+  {
+    "q": "Which of the following is NOT one of the common operations shown in the content provider diagram?",
+    "options": [
+      "navigate()",
+      "insert()",
+      "update()",
+      "query()"
+    ],
+    "correct": 0,
+    "why": "The content provider diagram shows insert(), update(), delete(), and query(), not navigate()."
+  },
+  {
+    "q": "What does the lecture's content provider scenario illustrate?",
+    "options": [
+      "A UI app can access data exposed by a separate data app through a content provider",
+      "Only one Activity can ever access a database",
+      "Content providers can only be used inside the same composable",
+      "Broadcast receivers directly replace all databases"
+    ],
+    "correct": 0,
+    "why": "The typical scenario diagram shows a UI app's Activity interacting with a data app's content provider, which then accesses its database."
+  },
+  {
+    "q": "Which of the following is an Android content provider example listed in the lecture?",
+    "options": [
+      "Contacts",
+      "NavController",
+      "ViewModelStore",
+      "WorkRequest"
+    ],
+    "correct": 0,
+    "why": "The Android Content Providers slide lists Browser, Call log, Contacts, Media, and UserDictionary."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class SimpleWorker(context: Context, params: WorkerParameters) : Worker(context, params) {\n2      override fun doWork(): Result {\n3          Log.d(\"SimpleWorker\", \"do work in SimpleWorker\")\n4          return Result.success()\n5      }\n6  }\n7  val request = OneTimeWorkRequest.Builder(SimpleWorker::class.java)\n8      .setInitialDelay(5, TimeUnit.MINUTES)\n9      .build()\n10 WorkManager.getInstance(context).enqueue(request)</pre>\nWhat does this code do?",
+    "options": [
+      "Defines a worker, delays it by 5 minutes, then enqueues it for one-time execution",
+      "Creates a bound service that starts immediately and repeats forever",
+      "Registers a broadcast receiver in the manifest",
+      "Creates a content provider with a query method"
+    ],
+    "correct": 0,
+    "why": "Lines 1–6 define a Worker. Lines 7–9 build a OneTimeWorkRequest with an initial delay of 5 minutes. Line 10 enqueues that request with WorkManager."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  override fun onResume() {\n2      super.onResume()\n3      registerReceiver(receiver, IntentFilter(Intent.ACTION_HEADSET_PLUG))\n4  }\n5  override fun onPause() {\n6      super.onPause()\n7      unregisterReceiver(receiver)\n8  }</pre>\nWhat is the main reason for registering and unregistering the receiver this way?",
+    "options": [
+      "To keep the receiver active only while the Activity is in the appropriate running lifecycle window",
+      "To make it behave like a static manifest receiver even when the app is closed",
+      "To convert it into a foreground service",
+      "To persist it across device reboots automatically"
+    ],
+    "correct": 0,
+    "why": "Dynamic broadcast receivers are intended to exist only during the app lifecycle. Registering in onResume() and unregistering in onPause() keeps it tied to that lifecycle window."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val intent = Intent(context, TargetActivity::class.java)\n2  val pendingIntent = PendingIntent.getActivity(\n3      context, ID, intent, PendingIntent.FLAG_CANCEL_CURRENT)\n4  val action = Notification.Action.Builder(R.drawable.ic_launch, \"LAUNCH\", pendingIntent)\n5      .build()</pre>\nWhat is the role of the PendingIntent in this notification flow?",
+    "options": [
+      "It defers launching TargetActivity until the notification action is triggered",
+      "It immediately opens TargetActivity on line 2",
+      "It stores the notification channel in the database",
+      "It turns the action into a broadcast receiver"
+    ],
+    "correct": 0,
+    "why": "The lecture explains that the Intent is wrapped in a PendingIntent so NotificationManager can later launch the activity when the user taps the notification action."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>
