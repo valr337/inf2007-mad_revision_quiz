@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Quiz 2 mock test V2</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Quiz 2 Mock examination V2</h1>
+      <div class="sub">INF2007 – Mobile Application Development • 50-question mix (Lec 7–10 + Code Blocks 2 + TF 2)</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Generated from INF2007 lecture topics (Weeks 6–11). This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "Which statement best reflects the goal of layered Android architecture from Lecture 7?",
+    "options": [
+      "Keep UI, domain, and data responsibilities separated",
+      "Put SQL queries directly in composables",
+      "Merge networking into Activity lifecycle methods",
+      "Avoid state hoisting"
+    ],
+    "correct": 0,
+    "why": "Layered architecture separates concerns so each layer has a clear responsibility."
+  },
+  {
+    "q": "In the recommended app architecture, what should typically act as the single source of truth for persisted app data?",
+    "options": [
+      "Repository-backed local database",
+      "Composable preview state",
+      "Intent extras",
+      "Toast messages"
+    ],
+    "correct": 0,
+    "why": "Repository/data layer with database is the authoritative source."
+  },
+  {
+    "q": "Which pair correctly represents unidirectional data flow?",
+    "options": [
+      "UI events go up, state comes down",
+      "State goes up, events come down",
+      "Both only stay in UI",
+      "Data only flows from DB to network"
+    ],
+    "correct": 0,
+    "why": "UDF sends events upward and state downward."
+  },
+  {
+    "q": "Why is ViewModel used between UI and repository?",
+    "options": [
+      "To store UI-related state and survive configuration changes",
+      "To replace Room entities",
+      "To render XML layouts",
+      "To request runtime permissions automatically"
+    ],
+    "correct": 0,
+    "why": "ViewModel stores UI state and survives rotation."
+  },
+  {
+    "q": "Which is a key benefit of exposing immutable UI state from ViewModel?",
+    "options": [
+      "Prevents accidental mutation from UI consumers",
+      "Makes coroutines slower",
+      "Disables recomposition",
+      "Removes need for testing"
+    ],
+    "correct": 0,
+    "why": "Immutable outward state improves safety and predictability."
+  },
+  {
+    "q": "In Room, which component contains SQL operations?",
+    "options": [
+      "DAO",
+      "Entity",
+      "RoomDatabase subclass only",
+      "Repository interface only"
+    ],
+    "correct": 0,
+    "why": "DAO defines queries and DB operations."
+  },
+  {
+    "q": "What is the role of AppDb : RoomDatabase()?",
+    "options": [
+      "Main access point that ties DAOs and entities together",
+      "Defines composable themes",
+      "Replaces dependency injection",
+      "Runs on main thread only"
+    ],
+    "correct": 0,
+    "why": "RoomDatabase provides DAOs and DB configuration."
+  },
+  {
+    "q": "Which statement about repository pattern is TRUE?",
+    "options": [
+      "Repository may combine remote and local data sources behind one API",
+      "Repository can only read network data",
+      "Repository should be accessed only by Activity",
+      "Repository cannot use coroutines"
+    ],
+    "correct": 0,
+    "why": "Repository abstracts source details and orchestration."
+  },
+  {
+    "q": "What does dependency injection improve most directly?",
+    "options": [
+      "Testability and decoupling",
+      "APK size only",
+      "Frame rate only",
+      "Battery usage only"
+    ],
+    "correct": 0,
+    "why": "DI decouples creation from usage, improving tests."
+  },
+  {
+    "q": "Which statement about constructor injection is correct?",
+    "options": [
+      "Dependencies are provided through constructor parameters",
+      "Class creates all dependencies internally",
+      "It works only for Activities",
+      "It cannot be used with interfaces"
+    ],
+    "correct": 0,
+    "why": "Constructor injection explicitly states required deps."
+  },
+  {
+    "q": "In Hilt, which annotation is used on Application class?",
+    "options": [
+      "@HiltAndroidApp",
+      "@AndroidEntryPoint",
+      "@InjectApp",
+      "@Provides"
+    ],
+    "correct": 0,
+    "why": "@HiltAndroidApp boots Hilt in the app."
+  },
+  {
+    "q": "Which Android class usually gets @AndroidEntryPoint for field injection?",
+    "options": [
+      "Activity/Fragment",
+      "Entity",
+      "DAO",
+      "RoomDatabase"
+    ],
+    "correct": 0,
+    "why": "Android components like Activity/Fragment use @AndroidEntryPoint."
+  },
+  {
+    "q": "What does @Module + @InstallIn(SingletonComponent::class) indicate?",
+    "options": [
+      "Bindings available application-wide",
+      "Only test-only bindings",
+      "Only ViewModel bindings",
+      "Only Compose preview bindings"
+    ],
+    "correct": 0,
+    "why": "SingletonComponent bindings live for app lifetime."
+  },
+  {
+    "q": "Which statement about @Singleton in Hilt is correct?",
+    "options": [
+      "Same instance reused in SingletonComponent",
+      "New instance per injection always",
+      "Only valid on DAO methods",
+      "Makes object main-thread only"
+    ],
+    "correct": 0,
+    "why": "Singleton scope reuses one instance."
+  },
+  {
+    "q": "Choose the best reason to inject Retrofit API via Hilt.",
+    "options": [
+      "Centralized creation and easier replacement in tests",
+      "To avoid all network errors",
+      "To disable coroutines",
+      "To remove JSON parsing"
+    ],
+    "correct": 0,
+    "why": "DI centralizes setup and simplifies mocking."
+  },
+  {
+    "q": "What is wrong with class A { val repo = RealRepo() } in DI context?",
+    "options": [
+      "Tight coupling makes testing harder",
+      "It improves testability",
+      "It guarantees loose coupling",
+      "It is required by Hilt"
+    ],
+    "correct": 0,
+    "why": "Hard-coded implementations hurt substitution."
+  },
+  {
+    "q": "Which dispatcher is most appropriate for blocking I/O work?",
+    "options": [
+      "Dispatchers.IO",
+      "Dispatchers.Main",
+      "Dispatchers.Default",
+      "Dispatchers.Unconfined"
+    ],
+    "correct": 0,
+    "why": "IO dispatcher is tuned for I/O."
+  },
+  {
+    "q": "Which dispatcher is best for CPU-intensive calculation?",
+    "options": [
+      "Dispatchers.Default",
+      "Dispatchers.Main",
+      "Dispatchers.IO",
+      "Dispatchers.Main.immediate only"
+    ],
+    "correct": 0,
+    "why": "Default dispatcher targets CPU-bound work."
+  },
+  {
+    "q": "Why should long operations avoid main thread?",
+    "options": [
+      "To prevent UI jank and ANR",
+      "To disable lifecycle events",
+      "To force service restart",
+      "To reduce APK signing time"
+    ],
+    "correct": 0,
+    "why": "Blocking main thread causes jank/ANR."
+  },
+  {
+    "q": "Which statement about suspend function is true?",
+    "options": [
+      "It can suspend without blocking underlying thread",
+      "It always starts a new coroutine",
+      "It runs only on IO dispatcher",
+      "It cannot call delay"
+    ],
+    "correct": 0,
+    "why": "Suspend enables non-blocking suspension."
+  },
+  {
+    "q": "What does launch return?",
+    "options": [
+      "Job",
+      "Deferred<T>",
+      "Flow<T>",
+      "Thread"
+    ],
+    "correct": 0,
+    "why": "launch returns Job."
+  },
+  {
+    "q": "What does async return?",
+    "options": [
+      "Deferred result holder",
+      "Job only",
+      "StateFlow",
+      "LiveData"
+    ],
+    "correct": 0,
+    "why": "async returns Deferred."
+  },
+  {
+    "q": "How does withContext behave?",
+    "options": [
+      "Switches context and resumes same coroutine after block",
+      "Always creates detached coroutine tree",
+      "Blocks main thread by default",
+      "Cancels parent immediately"
+    ],
+    "correct": 0,
+    "why": "withContext switches context for block and returns."
+  },
+  {
+    "q": "What is structured concurrency mainly about?",
+    "options": [
+      "Child coroutines tied to scope lifecycle",
+      "Using GlobalScope everywhere",
+      "Disabling cancellation",
+      "Avoiding suspend functions"
+    ],
+    "correct": 0,
+    "why": "Children should be bounded by parent scope."
+  },
+  {
+    "q": "If parent scope is cancelled, what usually happens to children?",
+    "options": [
+      "Children are cancelled too",
+      "Children become singletons",
+      "Children move to IO automatically",
+      "Nothing"
+    ],
+    "correct": 0,
+    "why": "Cancellation propagates through Job hierarchy."
+  },
+  {
+    "q": "What is a major risk of GlobalScope in app code?",
+    "options": [
+      "Work may outlive lifecycle and leak resources",
+      "It is required for ViewModel",
+      "It enforces structured concurrency",
+      "It cannot launch coroutines"
+    ],
+    "correct": 0,
+    "why": "GlobalScope is lifecycle-unaware."
+  },
+  {
+    "q": "Which statement about StateFlow is correct?",
+    "options": [
+      "It is hot and has current value",
+      "It emits only once",
+      "It requires XML",
+      "It cannot be collected in lifecycle scopes"
+    ],
+    "correct": 0,
+    "why": "StateFlow always keeps latest value."
+  },
+  {
+    "q": "Compared with LiveData, StateFlow naturally integrates with...",
+    "options": [
+      "Flow operators and coroutine scopes",
+      "Manifest declarations",
+      "Room annotations only",
+      "ADB tooling"
+    ],
+    "correct": 0,
+    "why": "StateFlow is part of Kotlin Flow ecosystem."
+  },
+  {
+    "q": "When collecting flow in Android UI, what is a best practice?",
+    "options": [
+      "Use lifecycle-aware scopes",
+      "Use busy while(true) loops on Main",
+      "Collect in data class constructor",
+      "Use Thread.stop()"
+    ],
+    "correct": 0,
+    "why": "Lifecycle-aware collection prevents leaks."
+  },
+  {
+    "q": "Which statement about Service from Lecture 10 is TRUE?",
+    "options": [
+      "Service can run work beyond Activity visibility",
+      "Service is a UI widget",
+      "Service replaces RecyclerView",
+      "Service cannot run in background"
+    ],
+    "correct": 0,
+    "why": "Services can continue work beyond visible UI."
+  },
+  {
+    "q": "Foreground service requires what user-visible requirement?",
+    "options": [
+      "Ongoing notification",
+      "Compose Scaffold",
+      "Room migration",
+      "Broadcast receiver"
+    ],
+    "correct": 0,
+    "why": "Foreground services must show ongoing notification."
+  },
+  {
+    "q": "What is WorkManager best suited for?",
+    "options": [
+      "Deferrable guaranteed background work",
+      "Immediate UI drawing",
+      "In-memory caching only",
+      "Navigation graphs"
+    ],
+    "correct": 0,
+    "why": "WorkManager handles guaranteed deferrable tasks."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class Repo @Inject constructor(private val api: Api)\n2  class VM @Inject constructor(private val repo: Repo)</pre>\nWhat relationship is shown?",
+    "options": [
+      "Constructor injection chain",
+      "Inheritance chain",
+      "Room relation",
+      "Broadcast registration"
+    ],
+    "correct": 0,
+    "why": "Both classes receive dependencies via constructor parameters."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Module\n2  @InstallIn(SingletonComponent::class)\n3  object NetModule {\n4    @Provides fun provideBaseUrl() = \"https://api\"\n5  }</pre>\nWhat is line 4 doing?",
+    "options": [
+      "Providing a dependency instance for graph",
+      "Launching coroutine",
+      "Declaring entity",
+      "Registering receiver"
+    ],
+    "correct": 0,
+    "why": "@Provides contributes dependency to Hilt graph."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  fun main() = runBlocking {\n2    launch { delay(200); println(\"A\") }\n3    println(\"B\")\n4  }</pre>\nLikely output order?",
+    "options": [
+      "B then A",
+      "A then B",
+      "Only A",
+      "Only B"
+    ],
+    "correct": 0,
+    "why": "B prints first, launched coroutine prints A later."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  suspend fun load() {\n2    withContext(Dispatchers.IO) {\n3      delay(100)\n4    }\n5  }</pre>\nwithContext in line 2 mainly...",
+    "options": [
+      "Switches dispatcher for enclosed block",
+      "Creates forever-running thread",
+      "Blocks caller thread permanently",
+      "Disables cancellation"
+    ],
+    "correct": 0,
+    "why": "withContext changes coroutine context for the block."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val state = MutableStateFlow(0)\n2  state.value = 1\n3  state.value = 2</pre>\nA new collector started after line 3 first receives...",
+    "options": [
+      "2",
+      "0",
+      "1",
+      "Nothing"
+    ],
+    "correct": 0,
+    "why": "StateFlow replays the latest value to new collectors."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val parent = CoroutineScope(Job())\n2  parent.launch { delay(1000) }\n3  parent.cancel()</pre>\nAfter line 3, launched child is...",
+    "options": [
+      "Cancelled",
+      "Promoted to root",
+      "Converted to thread",
+      "Always completed"
+    ],
+    "correct": 0,
+    "why": "Cancelling parent Job cancels its child."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Dao interface UserDao {\n2    @Query(\"SELECT * FROM user\")\n3    suspend fun all(): List<User>\n4  }</pre>\nWhy make line 3 suspend?",
+    "options": [
+      "To call from coroutine without blocking main thread",
+      "To force main-thread execution",
+      "Because Room requires launch",
+      "To disable cancellation"
+    ],
+    "correct": 0,
+    "why": "Suspend DAO access supports async execution."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @HiltViewModel\n2  class LoginVm @Inject constructor(repo: AuthRepo): ViewModel()</pre>\nWhich is true?",
+    "options": [
+      "ViewModel can receive injected dependencies",
+      "ViewModel must be singleton only",
+      "@Inject is invalid on constructors",
+      "Hilt cannot work with ViewModel"
+    ],
+    "correct": 0,
+    "why": "Hilt supports constructor injection in ViewModel."
+  },
+  {
+    "q": "True or False: In DI, creating dependencies inside the class usually increases coupling.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "Internal construction ties class to concrete implementations."
+  },
+  {
+    "q": "True or False: Dispatchers.Main is intended for UI work.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "Main dispatcher corresponds to UI thread."
+  },
+  {
+    "q": "True or False: StateFlow is a cold stream that starts only when collected.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "StateFlow is hot."
+  },
+  {
+    "q": "True or False: SupervisorJob isolates sibling failures by default.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "A child failure does not automatically cancel siblings."
+  },
+  {
+    "q": "True or False: WorkManager is unnecessary when work must be guaranteed after app restart.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "WorkManager is designed for guaranteed deferrable work."
+  },
+  {
+    "q": "True or False: A foreground service must display a user-visible notification.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "Foreground service requires ongoing notification."
+  },
+  {
+    "q": "True or False: Room entities define table schema metadata.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "@Entity describes table schema."
+  },
+  {
+    "q": "True or False: withContext(Dispatchers.IO) always creates a brand-new independent parent Job.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "withContext switches context within same coroutine hierarchy."
+  },
+  {
+    "q": "True or False: GlobalScope should be the default choice for lifecycle-aware Android UI logic.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "Lifecycle scopes are preferred for UI logic."
+  },
+  {
+    "q": "True or False: BroadcastReceiver can listen to selected system events via intent filters.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "Receivers handle matching broadcast intents."
+  }
+];
+
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => ({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      })).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const title = document.createElement('p');
+        title.className = 'qtitle';
+        title.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(title);
+        head.appendChild(badge);
+        card.appendChild(head);
+
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+
+      updateStats();
+    }
+
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+
+      data.__answered = true;
+      state.answered++;
+
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+
+      exp.hidden = false;
+      updateStats();
+    }
+
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>
