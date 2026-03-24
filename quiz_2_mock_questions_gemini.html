@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Quiz 2 mock test questions</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Quiz 2 Mock examination Gemini generated questions</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Weeks 6–11 review • New question set</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Generated from INF2007 lecture topics (Weeks 6–11). This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "What is a key difference between a standard Flow and a StateFlow/SharedFlow according to the lecture?",
+    "options": [
+      "Standard flows are hot; StateFlow is cold.",
+      "Standard flows emit data regardless of observers; SharedFlow does not.",
+      "Standard flows are cold (lazy) and don't produce data without consumption; SharedFlow/StateFlow are hot.",
+      "Both are cold, but StateFlow runs on the Main thread."
+    ],
+    "correct": 2,
+    "why": "Standard Flows are cold and lazy (they do not produce data without a subscriber collecting them). SharedFlow and StateFlow are 'hot', meaning data emits irregardless of whether observers are subscribed."
+  },
+  {
+    "q": "How do you include a parent entity's fields directly inside a wrapper class when defining a Room relationship?\n<pre class=\"code-block\">1  data class UserAndLibrary(\n2      @________ val user: User,\n3      @Relation(\n4          parentColumn = \"userId\",\n5          entityColumn = \"userOwnerId\"\n6      )\n7      val library: Library\n8  )</pre>\nWhich annotation fills the blank at [Line 2]?",
+    "options": [
+      "PrimaryKey",
+      "Embedded",
+      "ColumnInfo",
+      "Transaction"
+    ],
+    "correct": 1,
+    "why": "The `@Embedded` annotation is used to include the parent entity directly within the result class, preventing the need to write custom SQL JOINs manually while using `@Relation` for the child entity."
+  },
+  {
+    "q": "When resolving race conditions in coroutines, why is `Mutex` preferred over Java's `synchronized` block?\n<pre class=\"code-block\">1  val mutex = Mutex()\n2  var counter = 0\n3  // Inside a coroutine\n4  mutex.withLock {\n5      counter++\n6  }</pre>",
+    "options": [
+      "synchronized() blocks the entire app, while Mutex only blocks the UI.",
+      "synchronized() does not support suspend functions; it blocks the underlying thread instead of cooperatively suspending the coroutine.",
+      "Mutex is part of the standard Java library, while synchronized is Kotlin-only.",
+      "Mutex automatically switches the context to Dispatchers.IO."
+    ],
+    "correct": 1,
+    "why": "The `synchronized` block is thread-blocking and does not support suspend functions. `Mutex` provides a `withLock` suspend function that safely suspends the coroutine without blocking the actual thread it runs on."
+  },
+  {
+    "q": "In Hilt dependency injection, which component is created at `Activity#onCreate()` and destroyed at `Activity#onDestroy()`?",
+    "options": [
+      "SingletonComponent",
+      "ViewModelComponent",
+      "ActivityRetainedComponent",
+      "ActivityComponent"
+    ],
+    "correct": 3,
+    "why": "According to the Hilt component lifecycle table, `ActivityComponent` is scoped to the Activity lifecycle. (`ActivityRetainedComponent` survives configuration changes, unlike ActivityComponent)."
+  },
+  {
+    "q": "What is the purpose of the `@Named` or `@Qualifier` annotation in Hilt?\n<pre class=\"code-block\">1  @Provides\n2  @Named(\"String1\")\n3  fun provideString1(): String {\n4      return \"String1\"\n5  }</pre>",
+    "options": [
+      "To define a constant string that can be used across the app.",
+      "To tell Hilt to run the provision on a specific background thread.",
+      "To differentiate between multiple dependencies of the exact same type (e.g., providing two different Strings).",
+      "To ensure the dependency is created as a Singleton."
+    ],
+    "correct": 2,
+    "why": "When you have multiple dependencies of the exact same type (like two Strings), `@Qualifier` or `@Named` provides a 'key' so Hilt knows exactly which instance to inject where."
+  },
+  {
+    "q": "According to the lecture, what is a primary advantage of Proto DataStore over Preferences DataStore?",
+    "options": [
+      "Proto DataStore is synchronous, making it faster to read.",
+      "Proto DataStore allows storing typed objects and provides type safety using Protocol Buffers.",
+      "Proto DataStore is the only DataStore that uses Kotlin Flow.",
+      "Proto DataStore stores data in plain text XML for easier debugging."
+    ],
+    "correct": 1,
+    "why": "Preferences DataStore does not ensure type safety (it uses string keys). Proto DataStore uses Protocol Buffers to define schemas, allowing you to persist strongly typed data safely."
+  },
+  {
+    "q": "Why would you use `DisposableEffect` instead of `LaunchedEffect` in Jetpack Compose?\n<pre class=\"code-block\">1  @Composable\n2  fun MyTimer(lifecycleOwner: LifecycleOwner) {\n3      DisposableEffect(lifecycleOwner) {\n4          val observer = ...\n5          lifecycleOwner.lifecycle.addObserver(observer)\n6          onDispose {\n7              lifecycleOwner.lifecycle.removeObserver(observer)\n8          }\n9      }\n10 }</pre>",
+    "options": [
+      "Because we need to run a suspend function.",
+      "Because LaunchedEffect cannot take parameters or keys.",
+      "Because the effect requires a cleanup action (onDispose) when it leaves the composition or the key changes.",
+      "Because DisposableEffect automatically switches execution to the Main thread."
+    ],
+    "correct": 2,
+    "why": "`DisposableEffect` is specifically designed for side effects that require cleanup. It mandates an `onDispose` block that executes when the composable leaves the composition or its keys change."
+  },
+  {
+    "q": "What does `withContext` do in this coroutine snippet?\n<pre class=\"code-block\">1  suspend fun fetchFromNetwork(): String {\n2      return withContext(Dispatchers.IO) {\n3          // network call\n4          \"Data\"\n5      }\n6  }</pre>",
+    "options": [
+      "It launches a brand new coroutine in the background.",
+      "It suspends the current coroutine, switches execution to the IO dispatcher, and resumes the original coroutine with the result.",
+      "It blocks the main thread until the network call finishes.",
+      "It cancels the parent coroutine to save memory."
+    ],
+    "correct": 1,
+    "why": "`withContext` is a suspend function that switches the context (dispatcher) of the *current* coroutine without creating a new one. It suspends execution, does the work on the specified dispatcher, and returns the result."
+  },
+  {
+    "q": "What is the role of the `@Query` annotation in Retrofit?\n<pre class=\"code-block\">1  @GET(\"search/repositories\")\n2  suspend fun searchRepos(\n3      @Query(\"page\") page: Int,\n4      @Query(\"per_page\") perPage: Int\n5  ): RepoResponse</pre>",
+    "options": [
+      "It injects a SQLite database query into the network request.",
+      "It appends the parameters to the URL as query strings (e.g., ?page=1&per_page=50).",
+      "It replaces relative path placeholders in the URL.",
+      "It adds a specific request header to the HTTP call."
+    ],
+    "correct": 1,
+    "why": "The `@Query` annotation translates the provided arguments into URL query parameters appended to the endpoint path."
+  },
+  {
+    "q": "What problem does `flatMapLatest` solve here compared to a standard `map`?\n<pre class=\"code-block\">1  val postalCodeFlow = addressInput.flatMapLatest { address ->\n2      repository.getPostCodeFlow(address)\n3  }.stateIn(viewModelScope, SharingStarted.Lazily, \"\")</pre>",
+    "options": [
+      "It prevents the local database from crashing under heavy load.",
+      "It handles Android configuration changes automatically.",
+      "If the user changes input before the previous query finishes, it discards old results and only emits the latest query result.",
+      "It runs the database query synchronously to ensure data is ready immediately."
+    ],
+    "correct": 2,
+    "why": "`flatMapLatest` ensures that if a new value is emitted into `addressInput` (like a user typing quickly), any currently running asynchronous operations for the old input are cancelled, preventing stale or incorrect data from updating the UI."
+  },
+  {
+    "q": "Why would you choose to use `rememberCoroutineScope` instead of `LaunchedEffect` within a Jetpack Compose UI component?",
+    "options": [
+      "To run a suspend function exactly once when the Composable enters the composition.",
+      "To manually launch a coroutine outside the Composable's immediate rendering phase, such as inside an onClick event handler.",
+      "To automatically restart the coroutine every time the Composable recomposes.",
+      "To share state globally across all ViewModels."
+    ],
+    "correct": 1,
+    "why": "`rememberCoroutineScope` returns a scope bound to the point in the Composition where it is called. This allows you to safely launch coroutines outside of the composition phase itself (e.g., in a Button's onClick callback) while ensuring they are cancelled when the composable leaves the screen[cite: 1]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val myFlow = flow {\n2      emit(someDataComputation())\n3  }.flowOn(Dispatchers.Default)</pre>\nWhat effect does the `flowOn` operator at [line 3] have on the execution context?",
+    "options": [
+      "The emitter block (line 2) runs on Dispatchers.Default, while the downstream collector runs on its own original context.",
+      "Both the emitter and the collector are forced to run on Dispatchers.Default.",
+      "The flow ignores Dispatchers.Default and automatically defaults to the Main thread.",
+      "It throws a runtime exception because Flows are strictly confined to the Main thread."
+    ],
+    "correct": 0,
+    "why": "By default, the producer of a flow executes in the CoroutineContext of the coroutine that collects it. The `flowOn` operator changes the context of the upstream flow (the emitter) to run on the specified dispatcher, leaving the downstream collector unaffected[cite: 1]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val time = measureTimeMillis {\n2      val one = async { doSomethingUsefulOne() }\n3      val two = async { doSomethingUsefulTwo() }\n4      println(\"The answer is ${one.await() + two.await()}\")\n5  }</pre>\nAssuming both suspend functions take exactly 1000ms to complete, roughly how long will this entire block take to execute?",
+    "options": [
+      "~2000 ms",
+      "~1000 ms",
+      "~0 ms",
+      "It will fail to compile because await() cannot be called concurrently."
+    ],
+    "correct": 1,
+    "why": "The `async` builder starts a coroutine that computes a result concurrently. By starting both `async` blocks before calling `.await()` on either, they run in parallel, completing in roughly the time of the longest single delay (~1000ms) rather than sequentially (~2000ms)[cite: 1]."
+  },
+  {
+    "q": "According to the lecture, what is a key difference in behavior between `StateFlow` and `LiveData` when used to hold UI state?",
+    "options": [
+      "StateFlow is lifecycle-aware by default, while LiveData is not.",
+      "StateFlow requires an initial state to be passed to its constructor, whereas LiveData does not.",
+      "LiveData can only hold Strings, whereas StateFlow can hold any object type.",
+      "StateFlow runs exclusively on the Main thread."
+    ],
+    "correct": 1,
+    "why": "StateFlow and LiveData have similarities, but StateFlow requires an initial state to be passed into its constructor, while LiveData does not. Additionally, LiveData's observer automatically unregisters when the view stops, whereas StateFlow requires explicit lifecycle-aware collection[cite: 1, 3]."
+  },
+  {
+    "q": "Which Hilt component scope should you use if you want a dependency to survive configuration changes (like screen rotations) but NOT persist for the entire lifetime of the application?",
+    "options": [
+      "SingletonComponent",
+      "ActivityComponent",
+      "ActivityRetainedComponent",
+      "FragmentComponent"
+    ],
+    "correct": 2,
+    "why": "According to the Hilt component lifecycle table, the `ActivityRetainedComponent` is created at `Activity#onCreate()` but survives configuration changes, making it ideal for instances that need to outlive a single activity recreation but aren't global singletons[cite: 2]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  Retrofit.Builder()\n2      .baseUrl(BASE_URL)\n3      .addConverterFactory(GsonConverterFactory.create())\n4      .build()</pre>\nWhat is the purpose of the method called on [line 3]?",
+    "options": [
+      "It configures OkHttp to parse XML.",
+      "It provides a mechanism to serialize and deserialize data between the network format (JSON) and Kotlin data objects.",
+      "It configures the OkHttp client's timeout limits.",
+      "It handles Hilt dependency injection for the Retrofit instance."
+    ],
+    "correct": 1,
+    "why": "In Retrofit, a ConverterFactory (like GsonConverterFactory) is used to automatically map the HTTP response body (typically JSON) into your defined standard Kotlin data classes and vice versa[cite: 2]."
+  },
+  {
+    "q": "When using Hilt, what is a primary structural requirement when using the `@Binds` annotation in a `@Module` instead of `@Provides`?",
+    "options": [
+      "The module must be an abstract class, and the function must be an abstract function that takes the implementation as a parameter and returns the interface type.",
+      "The function must create a new instance of the object using the `new` keyword.",
+      "It can only be used inside an ActivityComponent, never in a SingletonComponent.",
+      "It requires the `@Singleton` annotation to compile."
+    ],
+    "correct": 0,
+    "why": "When using `@Binds`, the module must be an abstract class and the binding function must be abstract. It tells Hilt which implementation to use when an interface is requested, by taking the concrete implementation as a parameter and returning the interface[cite: 2]."
+  },
+  {
+    "q": "If a Hilt `ViewModel` requires a runtime parameter (e.g., a specific ID passed dynamically from a navigation route) that cannot be injected directly from the static DI graph, what Hilt feature must be used?",
+    "options": [
+      "@Inject Constructor with default values",
+      "SharedPreferences",
+      "@AssistedInject along with an @AssistedFactory",
+      "@Named annotations"
+    ],
+    "correct": 2,
+    "why": "Assisted Injection is used when a ViewModel requires a runtime parameter (such as a string argument from Navigation). You use `@AssistedInject` in the constructor for the arguments annotated with `@Assisted`, and create an `@AssistedFactory` interface to generate the ViewModel[cite: 2]."
+  },
+  {
+    "q": "When querying a one-to-one relationship using `@Embedded` and `@Relation` in a Room DAO, why is it necessary to annotate the query function with `@Transaction`?",
+    "options": [
+      "To prevent SQL injection attacks.",
+      "To ensure that the multiple queries executed behind the scenes to fetch the related entities are run atomically, preventing inconsistent data if the database changes mid-query.",
+      "To force the query to run on the Main Thread.",
+      "To automatically convert the result into a StateFlow."
+    ],
+    "correct": 1,
+    "why": "When querying relationships (like one-to-one or one-to-many), Room actually runs multiple underlying SQL queries. Using `@Transaction` ensures that these operations are executed atomically, avoiding inconsistent data if another thread modifies the database concurrently[cite: 3]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  @Insert(onConflict = OnConflictStrategy.REPLACE)\n2  suspend fun insertOrUpdate(word: Word)</pre>\nWhat happens if you attempt to insert an entity that shares a primary key with an existing row in the database?",
+    "options": [
+      "It throws a SQLiteConstraintException.",
+      "It ignores the new entity and keeps the old one in the database.",
+      "It replaces the existing row in the database with the new entity.",
+      "It merges the non-null fields of the new entity into the existing entity."
+    ],
+    "correct": 2,
+    "why": "The `OnConflictStrategy.REPLACE` directive tells SQLite to replace the old data with the new data entirely if there is a conflict (such as a matching primary key)[cite: 3]."
+  },
+  {
+    "q": "According to the lecture, which of the following is a drawback of `SharedPreferences` that `DataStore` was specifically designed to overcome?",
+    "options": [
+      "SharedPreferences uses XML, which is incompatible with modern Android.",
+      "SharedPreferences is fully asynchronous, making it hard to read synchronously.",
+      "SharedPreferences has a transactional API with strong consistency guarantees.",
+      "SharedPreferences is not safe from runtime parsing exceptions and lacks a strongly consistent transactional API."
+    ],
+    "correct": 3,
+    "why": "SharedPreferences has notable issues: they are not safe from runtime parsing exceptions, they don't have a transactional API with strong consistency, and calling them synchronously can block the UI thread. DataStore solves this using Coroutines and Flow transactionally[cite: 3]."
+  },
+  {
+    "q": "In the Unidirectional Data Flow (UDF) architecture, what is the primary responsibility of a 'State Holder' (like a ViewModel)?",
+    "options": [
+      "To directly manipulate the DOM/View hierarchy using findViewById.",
+      "To store raw SQL strings and execute database migrations.",
+      "To define the logic applied to UI events, transform application data, and produce the updated UI state.",
+      "To provide a direct bridge between the UI and remote network APIs, bypassing the Repository layer entirely."
+    ],
+    "correct": 2,
+    "why": "State holders (typically ViewModels) define the logic to be applied to events in the app and produce the updated UI state as a result. They encapsulate UI state and handle user actions[cite: 3]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  withTimeout(1300L) {\n2      // Do some long-running task\n3  }</pre>\nWhat happens if the task inside this block takes 2000ms to complete?",
+    "options": [
+      "It pauses the coroutine indefinitely.",
+      "It cancels the coroutine and throws a TimeoutCancellationException.",
+      "It retries the block repeatedly until it completes within the limit.",
+      "It allocates more CPU threads to speed up the task."
+    ],
+    "correct": 1,
+    "why": "`withTimeout` is a cancellation mechanism. If the block takes longer than the specified timeout, it actively cancels the running coroutine and throws a `TimeoutCancellationException`[cite: 1]."
+  },
+  {
+    "q": "What is the defining characteristic of the `Dispatchers.Unconfined` dispatcher?",
+    "options": [
+      "It creates a brand new thread for every coroutine.",
+      "It is strictly confined to the Main thread.",
+      "It limits the number of concurrent tasks to a maximum of 4.",
+      "It starts the coroutine in the caller thread, but upon resuming from a suspension point, it resumes in whatever thread the suspending function used."
+    ],
+    "correct": 3,
+    "why": "`Dispatchers.Unconfined` is 'not confined' to a specific thread. It initially runs on the caller's thread, but after the first suspension, it resumes on the thread dictated by the suspending function that was called[cite: 1]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  class TestData @Inject constructor(\n2      testDependency: TestDependency \n3  )</pre>\nIf `TestDependency` is NOT provided in a Hilt module and does NOT have an `@Inject` constructor itself, what will happen?",
+    "options": [
+      "Hilt will automatically download the missing dependency.",
+      "Hilt will throw a compile-time error because it doesn't know how to supply the dependency.",
+      "Hilt will silently use the default no-args constructor of the dependency.",
+      "The app will compile but crash at runtime with a NullPointerException."
+    ],
+    "correct": 1,
+    "why": "Once you use `@Inject` on a class, all of its dependencies must be known to Hilt's dependency graph. If `TestDependency` is not provided via an `@Inject` constructor or a `@Module`, Hilt cannot build the graph and will fail at compile time[cite: 2]."
+  },
+  {
+    "q": "Why is `collectAsStateWithLifecycle()` strongly preferred over standard `collectAsState()` when observing Flows in a Jetpack Compose UI?",
+    "options": [
+      "It automatically converts LiveData to StateFlow behind the scenes.",
+      "It runs synchronously on the Main thread to prevent UI flickering.",
+      "It automatically cancels the flow collection when the app moves to the background, saving CPU and memory resources.",
+      "It caches the collected data permanently into a local SQLite database."
+    ],
+    "correct": 2,
+    "why": "`collectAsStateWithLifecycle()` collects values in a lifecycle-aware way, meaning it cancels the flow collection when the app is in the background (e.g., lifecycle state drops below STARTED). This prevents wasting resources processing data for UI that the user cannot currently see[cite: 3]."
+  },
+  {
+    "q": "When a Room DAO method is declared to return a `Flow<List<Word>>` instead of just a static `List<Word>`, what happens when the underlying database table is updated?",
+    "options": [
+      "The Flow throws a ConcurrentModificationException.",
+      "Room automatically re-runs the query asynchronously on a background thread and emits the new list to the Flow.",
+      "The developer must manually call `.refresh()` on the DAO.",
+      "The Flow is cancelled, and the collector must subscribe again."
+    ],
+    "correct": 1,
+    "why": "Room generates all the necessary code to automatically update the Flow object when a database is updated. The generated code detects the modification, re-runs the query asynchronously, and emits the updated data to the stream[cite: 3]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val sharedFlow = MutableSharedFlow<Int>(\n2      replay = 2\n3  )</pre>\nWhat does the `replay = 2` parameter signify in this `MutableSharedFlow`?",
+    "options": [
+      "The flow will retry failed emissions a maximum of 2 times.",
+      "The flow caches the last 2 emissions and immediately sends them to any new subscriber that begins collecting.",
+      "The flow delays its start by 2 milliseconds.",
+      "The flow restricts itself to a maximum of 2 concurrent subscribers."
+    ],
+    "correct": 1,
+    "why": "The `replay` parameter determines how many historical emissions are kept in a buffer. When a new subscriber collects from the flow, it will instantly receive those past buffered emissions. The default is 0[cite: 1]."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val client = OkHttpClient()\n2  val request = Request.Builder().url(\"https://www.google.com\").build()\n3  val response = client.newCall(request).execute()</pre>\nWhen executing this raw OkHttp code in Android, what is the consequence of calling `.execute()`?",
+    "options": [
+      "It automatically enqueues the request to be handled asynchronously on a background thread.",
+      "It converts the JSON response into a Flow stream.",
+      "It performs the network request synchronously, completely blocking the current thread until a response is received.",
+      "It bypasses Hilt dependency injection."
+    ],
+    "correct": 2,
+    "why": "The `execute()` method in OkHttp is completely synchronous. It creates a call object and blocks the current thread until the network response is fully returned[cite: 2]. Running this on the Main thread in Android will result in a crash."
+  },
+  {
+    "q": "To prevent state corruption due to race conditions in Kotlin Coroutines, the lecture demonstrated using `Mutex` and `AtomicInteger`. What other distinct architectural pattern was demonstrated using `sealed classes` and `Channels`?",
+    "options": [
+      "The Volatile Memory Pattern",
+      "The Actor Pattern",
+      "The Synchronized Block Pattern",
+      "The ThreadPool Handler Pattern"
+    ],
+    "correct": 1,
+    "why": "To resolve race conditions safely within coroutines, the lecture outlines using `Atomic` variables, `Mutex` locks, or the `Actor` pattern. The Actor pattern uses a channel to process state modifications sequentially by sending structured messages defined by a sealed class[cite: 1]."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>
