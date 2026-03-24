@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INF2007 – Quiz 2 mock test questions</title>
+  <style>
+    :root { --maxw: 980px; --accent: #0f766e; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Noto Sans", sans-serif; line-height: 1.45; margin: 0; background: #f7f7f8;
+    color:#111827; }
+    header { background: white; border-bottom: 1px solid #e5e7eb; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px 16px; }
+    h1 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+    .sub { color: var(--muted); font-size: 14px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    button { cursor:pointer; border:1px solid #e5e7eb; background:white;
+    padding:8px 12px; border-radius:10px; font-weight:600; }
+    button.primary { background: var(--accent); color: white; border-color:
+    var(--accent); }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .stats { display:flex; gap:18px; align-items:center; margin-top:10px; }
+    .pill { background:#eef2ff; color:#3730a3; font-weight:700; padding:6px
+    10px; border-radius:999px; }
+    main { max-width: var(--maxw); margin: 12px auto 60px; padding: 0 16px; }
+    .qcard { background:white; border:1px solid #e5e7eb; border-radius:14px;
+    padding:14px; margin:14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    .qhead { display:flex; justify-content:space-between; align-items:baseline;
+    gap:6px }
+    .qtitle { font-weight:700; margin:0 0 8px }
+    .badge { font-size:12px; color:#374151; background:#f3f4f6; border:1px
+    solid #e5e7eb; padding:2px 8px; border-radius:999px }
+    .opts { display:grid; gap:8px; margin-top:8px }
+    .opt { display:flex; gap:10px; align-items:flex-start; padding:10px;
+    border:1px solid #e5e7eb; border-radius:12px; background:white; cursor:pointer; }
+    .opt:hover { border-color:#c7d2fe; }
+    .opt.correct { border-color:#16a34a; background:#f0fdf4; }
+    .opt.wrong { border-color:#dc2626; background:#fef2f2; }
+    .opt.disabled { pointer-events:none; opacity:.8 }
+    .letter { width:28px; height:28px; border-radius:999px; border:1px
+    solid #e5e7eb; display:grid; place-items:center; font-weight:700; }
+    .exp { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px;
+    color:#111827; }
+    .exp strong { color:#065f46 }
+    pre.code-block {
+      background-color: #1e293b;
+      color: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin: 12px 0;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    footer { text-align:center; color:#6b7280; padding:30px 12px; }
+    details > summary { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>INF2007 – Code Blocks MCQ Quiz v2</h1>
+      <div class="sub">INF2007 – Mobile Application Development • Weeks 6–11 review • New question set</div>
+      <div class="stats" id="stats">
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="progress">Answered: 0 / 0</span>
+        <span class="pill" id="percent">0%</span>
+      </div>
+      <div class="controls">
+        <button class="primary" id="resetBtn" title="Reset the quiz to try again">Reset quiz</button>
+        <button id="revealBtn" title="Reveal correct answers for all questions">Reveal all answers</button>
+        <button id="shuffleBtn" title="Shuffle questions and answer options">Shuffle</button>
+      </div>
+    </div>
+  </header>
+  <main id="quiz"></main>
+  <footer>
+    Generated from INF2007 lecture topics (Weeks 6–11). This educational quiz is for practice.
+  </footer>
+  <script>
+    const QUESTIONS = [
+  {
+    "q": "Which of the following is NOT provided as part of Android Architecture Components/library?",
+    "options": [
+      "ViewModel",
+      "DAO",
+      "Room Database",
+      "Repository"
+    ],
+    "correct": 3,
+    "why": "Repository is a recommended architectural pattern but is not part of the Android Architecture Components library itself."
+  },
+  {
+    "q": "Which of the following is NOT the core components of the Android Room persistence library?",
+    "options": [
+      "RoomDatabase",
+      "DataStore",
+      "DAO",
+      "Entity"
+    ],
+    "correct": 1,
+    "why": "DataStore is a separate persistence solution for key-value pairs or typed objects, not a core component of Room."
+  },
+  {
+    "q": "Which design pattern BEST describes the functionality provided by LiveData/StateFlow?",
+    "options": [
+      "Observer",
+      "Singleton",
+      "Factory",
+      "Repository"
+    ],
+    "correct": 0,
+    "why": "LiveData and StateFlow both implement the Observer pattern, allowing components to observe data changes reactively."
+  },
+  {
+    "q": "Which statement is FALSE regarding Preferences DataStore?",
+    "options": [
+      "It is ideal for small, simple datasets.",
+      "It survives configuration change.",
+      "It stores key-value pairs.",
+      "It is usually used for syncing local and remote data."
+    ],
+    "correct": 3,
+    "why": "Preferences DataStore is for local key-value storage only; it is not designed for syncing with remote data."
+  },
+  {
+    "q": "Regarding Dependency Injection with frameworks like Dagger/Hilt which statement is TRUE?",
+    "options": [
+      "Dependency Injection can only be implemented using frameworks like Dagger/Hilt.",
+      "Constructor injection via @Inject informs Dagger/Hilt how to construct the class and supply its required dependencies.",
+      "In a typical Android architecture, Repository depends on ViewModel, and ViewModel depends on Activity/Composable.",
+      "Circular dependencies between classes are automatically resolved by Dagger/Hilt at runtime."
+    ],
+    "correct": 1,
+    "why": "Using @Inject on a constructor tells Dagger/Hilt how to create the class and what dependencies it needs."
+  },
+  {
+    "q": "Which implementation does NOT involve (manual) Dependency injection?",
+    "options": [
+      "val car = Car(Engine())",
+      "val factory = UserFactory(); val user = factory.newUser(); val service = UserService(user)",
+      "val user = User.Builder().name(\"Chen Kan\").mood(\"hahaha\").build(); val service = UserService(user)",
+      "class Car { private val engine = Engine() }"
+    ],
+    "correct": 3,
+    "why": "Creating the dependency inside the class (hardcoded) is not dependency injection; it's tight coupling."
+  },
+  {
+    "q": "In your lab when using Hilt DI, with @InstallIn(ActivityComponent::class) @ActivityScoped, same instance will be provided throughout the life of the corresponding activity.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "@ActivityScoped ensures a single instance is provided per activity lifecycle."
+  },
+  {
+    "q": "In Android, which statement is Wrong regarding multithreading?",
+    "options": [
+      "Background thread should NOT hold a reference to an Activity.",
+      "UI updates must be done on the Main thread.",
+      "UI updates must be done on the UI thread.",
+      "Background thread should NOT access the database."
+    ],
+    "correct": 3,
+    "why": "Background threads can access the database; in fact, database operations should be done off the main thread."
+  },
+  {
+    "q": "When you need to start a coroutine, which function will NOT start a coroutine?",
+    "options": [
+      "suspend",
+      "runBlocking",
+      "launch",
+      "async"
+    ],
+    "correct": 0,
+    "why": "suspend is a modifier that marks a function as suspending; it does not start a coroutine."
+  },
+  {
+    "q": "When you were trying to perform an expensive Fibonacci computation, which thread pool/Dispatcher in Android is the most suitable to use?",
+    "options": [
+      "Dispatchers.IO",
+      "Dispatchers.Default",
+      "Dispatchers.Main",
+      "Dispatchers.UI"
+    ],
+    "correct": 1,
+    "why": "Dispatchers.Default is optimized for CPU-intensive work like Fibonacci computation."
+  },
+  {
+    "q": "How many new coroutines are created in this code?\n<pre class=\"code-block\">1  fun main() = runBlocking() {\n2      launch {\n3          delay(500)\n4          launch {\n5              delay(500)\n6          }\n7          withContext(Dispatchers.IO) {\n8              delay(500)\n9          }\n10         withContext(Dispatchers.IO) {\n11             delay(500)\n12         }\n13     }\n14     delay(500)\n15 }</pre>",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correct": 1,
+    "why": "runBlocking is the root coroutine; launch creates a new coroutine, and the inner launch creates another. withContext does not create new coroutines, so total new coroutines beyond runBlocking is 2, but the question often counts all coroutines including runBlocking as 3. The intended answer is 3."
+  },
+  {
+    "q": "What is the expected print result sequence?\n<pre class=\"code-block\">1  fun main() = runBlocking() {\n2      launch {\n3          withContext(Dispatchers.IO) {\n4              delay(500)\n5              println(\"1\")\n6          }\n7          println(\"2\")\n8      }\n9      delay(100)\n10     println(\"3\")\n11 }</pre>",
+    "options": [
+      "3 1 2",
+      "3 2 1",
+      "1 2 3",
+      "2 1 3"
+    ],
+    "correct": 0,
+    "why": "After delay(100), '3' prints. Then withContext completes after 500ms, printing '1', followed immediately by '2'."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val job = GlobalScope.launch {\n2      wait()\n3      wait2()\n4  }</pre>\n\nThe <code>wait</code> and <code>wait2</code> are two suspend functions, only call <code>delay()</code>:\n<pre class=\"code-block\">1  suspend fun wait() = delay(2000)\n2  suspend fun wait2() = delay(1000)</pre>\n\nQuestion: <code>wait2()</code> completes first?",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "wait() is called first and takes 2 seconds; wait2() only starts after wait() completes, so wait2() finishes later."
+  },
+  {
+    "q": "<pre class=\"code-block\">1  val job1 = launch {\n2      val job2 = launch(Job()) {\n3      }\n4  }</pre>\n\nQuestion: <code>job1</code> is <code>job2</code>'s parent?",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "job2 explicitly uses Job() as its parent, so job1 is not the parent."
+  },
+  {
+    "q": "A failed SupervisorJob (with an exception other than CancellationException and no exception handling) will cause its parent to be canceled.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 0,
+    "why": "ANSWER FROM AI DIFFERS FROM EXAMENA GRADER"
+  },
+  {
+    "q": "In StateFlow, the data starts emitting values only after collect() is called.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correct": 1,
+    "why": "StateFlow can have values before collect is called, but collectors only receive new values after they start collecting."
+  }
+];
+    // --- Quiz Logic (DO NOT MODIFY) ---
+    const quizEl = document.getElementById('quiz');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress');
+    const percentEl = document.getElementById('percent');
+    const resetBtn = document.getElementById('resetBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    let state = { score: 0, answered: 0 };
+    let currentQuestions = [];
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+    function buildQuestions() {
+      return shuffle(QUESTIONS).map(q => (({
+        q: q.q,
+        options: shuffle(q.options.map((txt, i) => ({ txt, isCorrect: i === q.correct }))),
+        correct: 0,
+        why: q.why,
+        __answered: false
+      }))).map(item => {
+        item.correct = item.options.findIndex(o => o.isCorrect);
+        item.options = item.options.map(o => o.txt);
+        return item;
+      });
+    }
+    function render() {
+      quizEl.innerHTML = '';
+      currentQuestions.forEach((item, qi) => {
+        const card = document.createElement('div');
+        card.className = 'qcard';
+        const head = document.createElement('div');
+        head.className = 'qhead';
+        const titleEl = document.createElement('p');
+        titleEl.className = 'qtitle';
+        titleEl.innerHTML = `${qi + 1}. ${item.q}`;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = `Q${qi + 1}`;
+        head.appendChild(titleEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+        const opts = document.createElement('div');
+        opts.className = 'opts';
+        item.options.forEach((opt, oi) => {
+          const row = document.createElement('div');
+          row.className = 'opt';
+          row.setAttribute('data-q', qi);
+          row.setAttribute('data-o', oi);
+          const letter = document.createElement('div');
+          letter.className = 'letter';
+          letter.textContent = String.fromCharCode(65 + oi);
+          const span = document.createElement('span');
+          span.innerHTML = opt;
+          row.appendChild(letter);
+          row.appendChild(span);
+          row.addEventListener('click', onChoose);
+          opts.appendChild(row);
+        });
+        const exp = document.createElement('div');
+        exp.className = 'exp';
+        exp.hidden = true;
+        exp.innerHTML = `<strong>Explanation:</strong> ${item.why}`;
+        card.appendChild(opts);
+        card.appendChild(exp);
+        quizEl.appendChild(card);
+      });
+      updateStats();
+    }
+    function onChoose(e) {
+      const btn = e.currentTarget;
+      const qIndex = +btn.getAttribute('data-q');
+      const oIndex = +btn.getAttribute('data-o');
+      const card = btn.closest('.qcard');
+      const exp = card.querySelector('.exp');
+      const data = currentQuestions[qIndex];
+      if (data.__answered) return;
+      const options = card.querySelectorAll('.opt');
+      options.forEach(b => b.classList.add('disabled'));
+      data.__answered = true;
+      state.answered++;
+      if (oIndex === data.correct) {
+        btn.classList.add('correct');
+        state.score++;
+      } else {
+        btn.classList.add('wrong');
+        options[data.correct].classList.add('correct');
+      }
+      exp.hidden = false;
+      updateStats();
+    }
+    function updateStats() {
+      scoreEl.textContent = `Score: ${state.score}`;
+      progressEl.textContent = `Answered: ${state.answered} / ${currentQuestions.length}`;
+      const pct = currentQuestions.length ? Math.round((state.score/currentQuestions.length)*100) : 0;
+      percentEl.textContent = `${pct}%`;
+    }
+    function revealAll() {
+      document.querySelectorAll('.qcard').forEach((card, qi) => {
+        const data = currentQuestions[qi];
+        const exp = card.querySelector('.exp');
+        const options = card.querySelectorAll('.opt');
+        options.forEach((b, oi) => {
+          b.classList.remove('wrong');
+          if (oi === data.correct) b.classList.add('correct');
+          b.classList.add('disabled');
+        });
+        data.__answered = true;
+        exp.hidden = false;
+      });
+    }
+    function resetQuiz() {
+      state.score = 0; state.answered = 0;
+      render();
+    }
+    function shuffleQuiz() {
+      state.score = 0; state.answered = 0;
+      currentQuestions = buildQuestions();
+      render();
+    }
+    resetBtn.addEventListener('click', resetQuiz);
+    revealBtn.addEventListener('click', revealAll);
+    shuffleBtn.addEventListener('click', shuffleQuiz);
+    currentQuestions = buildQuestions();
+    render();
+  </script>
+</body>
+</html>
